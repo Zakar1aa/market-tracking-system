@@ -1,0 +1,57 @@
+<h2 mat-dialog-title>{{ isEditMode ? 'Edit Market' : 'Create New Market' }}</h2>
+
+<mat-dialog-content>
+  <form [formGroup]="marketForm" class="market-form">
+    
+    <mat-form-field appearance="outline">
+      <mat-label>Market Name</mat-label>
+      <input matInput formControlName="name" placeholder="Enter market name">
+      @if (marketForm.get('name')?.hasError('required')) {
+        <mat-error>Market name is required</mat-error>
+      }
+      @if (marketForm.get('name')?.hasError('minlength')) {
+        <mat-error>Market name must be at least 3 characters</mat-error>
+      }
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Description</mat-label>
+      <textarea 
+        matInput 
+        formControlName="description" 
+        placeholder="Enter market description"
+        rows="4">
+      </textarea>
+      @if (marketForm.get('description')?.hasError('required')) {
+        <mat-error>Description is required</mat-error>
+      }
+      @if (marketForm.get('description')?.hasError('minlength')) {
+        <mat-error>Description must be at least 10 characters</mat-error>
+      }
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Status</mat-label>
+      <mat-select formControlName="status">
+        @for (status of statusOptions; track status.value) {
+          <mat-option [value]="status.value">{{ status.label }}</mat-option>
+        }
+      </mat-select>
+      @if (marketForm.get('status')?.hasError('required')) {
+        <mat-error>Status is required</mat-error>
+      }
+    </mat-form-field>
+
+  </form>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-button (click)="onCancel()">Cancel</button>
+  <button 
+    mat-raised-button 
+    color="primary" 
+    (click)="onSubmit()" 
+    [disabled]="marketForm.invalid">
+    {{ isEditMode ? 'Update' : 'Create' }}
+  </button>
+</mat-dialog-actions>

@@ -4,7 +4,7 @@
       <h1>Markets</h1>
       <p class="subtitle">Manage your market segments</p>
     </div>
-    <button mat-raised-button color="primary">
+    <button mat-raised-button color="primary" (click)="openCreateDialog()">
       <mat-icon>add</mat-icon>
       New Market
     </button>
@@ -52,7 +52,7 @@
           <button mat-icon-button [routerLink]="['/markets', market.id]" matTooltip="View Details">
             <mat-icon>visibility</mat-icon>
           </button>
-          <button mat-icon-button matTooltip="Edit">
+          <button mat-icon-button (click)="openEditDialog(market)" matTooltip="Edit">
             <mat-icon>edit</mat-icon>
           </button>
           <button mat-icon-button color="warn" (click)="deleteMarket(market.id)" matTooltip="Delete">

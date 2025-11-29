@@ -1,0 +1,20 @@
+.market-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  min-width: 500px;
+  padding-top: 16px;
+
+  mat-form-field {
+    width: 100%;
+  }
+}
+
+mat-dialog-content {
+  padding: 0 24px !important;
+}
+
+mat-dialog-actions {
+  padding: 16px 24px !important;
+  gap: 8px;
+}

@@ -1,0 +1,64 @@
+.task-list-container {
+  padding: 24px;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+
+  h1 {
+    margin: 0 0 8px 0;
+    font-size: 32px;
+    font-weight: 500;
+    color: #333;
+  }
+
+  .subtitle {
+    margin: 0;
+    font-size: 16px;
+    color: #666;
+  }
+
+  button {
+    mat-icon {
+      margin-right: 8px;
+    }
+  }
+}
+
+.tasks-table {
+  width: 100%;
+
+  th {
+    font-weight: 600;
+    color: #333;
+    background: #f5f7fa;
+  }
+
+  td {
+    padding: 16px 8px;
+  }
+
+  mat-chip {
+    font-size: 12px;
+    min-height: 24px;
+  }
+
+  .overdue {
+    color: #f44336;
+    font-weight: 500;
+  }
+
+  .table-row {
+    cursor: pointer;
+    transition: background-color 0.2s;
+
+    &:hover {
+      background-color: #f5f7fa;
+    }
+  }
+}
