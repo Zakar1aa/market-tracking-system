@@ -1,11 +1,11 @@
-import { Component, OnInit } from '@angular/core';
+﻿import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatChipsModule } from '@angular/material/chips';
-import { MatDividerModule } from '@angular/material/divider';
+import { MatTabsModule } from '@angular/material/tabs';
 import { Market } from '../../../core/models/market.model';
 
 @Component({
@@ -13,68 +13,68 @@ import { Market } from '../../../core/models/market.model';
   standalone: true,
   imports: [
     CommonModule,
-    RouterLink,
     MatCardModule,
     MatButtonModule,
     MatIconModule,
     MatChipsModule,
-    MatDividerModule
+    MatTabsModule
   ],
   templateUrl: './market-detail.component.html',
   styleUrls: ['./market-detail.component.scss']
 })
 export class MarketDetailComponent implements OnInit {
   market: Market | null = null;
-  
-  // Mock data - this would come from API
   mockMarkets: Market[] = [
     {
-      id: 1,
-      name: 'Technology',
-      description: 'Technology and software development market',
-      status: 'ACTIVE',
-      createdAt: new Date('2025-01-15'),
-      updatedAt: new Date('2025-11-20')
+      id_marche: 1,
+      intitule: 'Technology',
+      objectif: 'Technology and software development market',
+      statut: 'En Cours',
+      date_debut: '2025-01-15',
+      date_fin: '2025-12-31',
+      id_service: 1,
+      created_at: '2025-01-15T10:00:00'
     },
     {
-      id: 2,
-      name: 'Healthcare',
-      description: 'Healthcare and medical services market',
-      status: 'ACTIVE',
-      createdAt: new Date('2025-02-10'),
-      updatedAt: new Date('2025-11-18')
+      id_marche: 2,
+      intitule: 'Healthcare',
+      objectif: 'Healthcare and medical services market',
+      statut: 'En Cours',
+      date_debut: '2025-02-10',
+      date_fin: '2025-12-31',
+      id_service: 1,
+      created_at: '2025-02-10T10:00:00'
     },
     {
-      id: 3,
-      name: 'Finance',
-      description: 'Financial services and banking market',
-      status: 'ACTIVE',
-      createdAt: new Date('2025-03-05'),
-      updatedAt: new Date('2025-11-15')
+      id_marche: 3,
+      intitule: 'Finance',
+      objectif: 'Financial services and banking market',
+      statut: 'En Cours',
+      date_debut: '2025-03-05',
+      date_fin: '2025-12-31',
+      id_service: 1,
+      created_at: '2025-03-05T10:00:00'
     },
     {
-      id: 4,
-      name: 'E-commerce',
-      description: 'Online retail and shopping platforms',
-      status: 'PENDING',
-      createdAt: new Date('2025-10-20'),
-      updatedAt: new Date('2025-11-25')
+      id_marche: 4,
+      intitule: 'E-commerce',
+      objectif: 'Online retail and shopping platforms',
+      statut: 'En Préparation',
+      date_debut: '2025-10-20',
+      date_fin: '2025-12-31',
+      id_service: 1,
+      created_at: '2025-10-20T10:00:00'
     },
     {
-      id: 5,
-      name: 'Education',
-      description: 'Educational technology and learning platforms',
-      status: 'INACTIVE',
-      createdAt: new Date('2025-04-12'),
-      updatedAt: new Date('2025-09-30')
+      id_marche: 5,
+      intitule: 'Education',
+      objectif: 'Educational technology and learning platforms',
+      statut: 'Terminé',
+      date_debut: '2025-04-12',
+      date_fin: '2025-09-30',
+      id_service: 1,
+      created_at: '2025-04-12T10:00:00'
     }
-  ];
-
-  // Mock related projects
-  relatedProjects = [
-    { id: 1, name: 'E-commerce Platform Redesign', status: 'IN_PROGRESS', progress: 65 },
-    { id: 2, name: 'Mobile App Development', status: 'IN_PROGRESS', progress: 40 },
-    { id: 3, name: 'Marketing Campaign Q4', status: 'PLANNING', progress: 15 }
   ];
 
   constructor(
@@ -84,22 +84,31 @@ export class MarketDetailComponent implements OnInit {
 
   ngOnInit(): void {
     const id = Number(this.route.snapshot.paramMap.get('id'));
-    this.market = this.mockMarkets.find(m => m.id === id) || null;
+    this.market = this.mockMarkets.find(m => m.id_marche === id) || null;
   }
 
-  getStatusColor(status: string): 'primary' | 'accent' | 'warn' {
-    const colors: { [key: string]: 'primary' | 'accent' | 'warn' } = {
-      'ACTIVE': 'primary',
-      'PENDING': 'accent',
-      'INACTIVE': 'warn'
-    };
-    return colors[status] || 'primary';
+  goBack(): void {
+    this.router.navigate(['/markets']);
   }
 
-  deleteMarket(): void {
-    if (confirm('Are you sure you want to delete this market?')) {
-      // TODO: Call API service when backend is connected
-      this.router.navigate(['/markets']);
+  editMarket(): void {
+    if (this.market) {
+      this.router.navigate(['/markets/edit', this.market.id_marche]);
+    }
+  }
+
+  getStatusColor(status: string): string {
+    switch (status) {
+      case 'En Cours':
+        return 'primary';
+      case 'Terminé':
+        return 'accent';
+      case 'En Préparation':
+        return 'warn';
+      case 'Annulé':
+        return 'warn';
+      default:
+        return 'primary';
     }
   }
 }

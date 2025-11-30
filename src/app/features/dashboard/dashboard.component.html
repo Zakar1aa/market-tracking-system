@@ -1,7 +1,7 @@
 <div class="dashboard-container">
   <div class="dashboard-header">
     <h1>Dashboard</h1>
-    <p class="subtitle">Welcome back! Here's what's happening with your projects.</p>
+    <p class="subtitle">Bienvenue! Voici un aperçu de vos marchés et tâches.</p>
   </div>
 
   <!-- Statistics Cards -->
@@ -14,7 +14,7 @@
           </div>
           <div class="stat-details">
             <div class="stat-value">{{ stats.totalMarkets }}</div>
-            <div class="stat-label">Total Markets</div>
+            <div class="stat-label">Total des Marchés</div>
           </div>
         </div>
       </mat-card-content>
@@ -24,11 +24,11 @@
       <mat-card-content>
         <div class="stat-content">
           <div class="stat-icon projects">
-            <mat-icon>folder</mat-icon>
+            <mat-icon>trending_up</mat-icon>
           </div>
           <div class="stat-details">
-            <div class="stat-value">{{ stats.activeProjects }}</div>
-            <div class="stat-label">Active Projects</div>
+            <div class="stat-value">{{ stats.activeMarkets }}</div>
+            <div class="stat-label">Marchés Actifs</div>
           </div>
         </div>
       </mat-card-content>
@@ -42,7 +42,7 @@
           </div>
           <div class="stat-details">
             <div class="stat-value">{{ stats.pendingTasks }}</div>
-            <div class="stat-label">Pending Tasks</div>
+            <div class="stat-label">Tâches en Attente</div>
           </div>
         </div>
       </mat-card-content>
@@ -56,71 +56,86 @@
           </div>
           <div class="stat-details">
             <div class="stat-value">{{ stats.completedTasks }}</div>
-            <div class="stat-label">Completed Tasks</div>
+            <div class="stat-label">Tâches Terminées</div>
           </div>
         </div>
       </mat-card-content>
     </mat-card>
   </div>
 
-  <!-- Recent Projects and Upcoming Tasks -->
-  <div class="content-grid">
-    <!-- Recent Projects -->
-    <mat-card class="content-card">
-      <mat-card-header>
-        <mat-card-title>Recent Projects</mat-card-title>
-        <button mat-button color="primary" routerLink="/projects">View All</button>
-      </mat-card-header>
-      <mat-card-content>
-        <div class="projects-list">
-          @for (project of recentProjects; track project.id) {
-            <div class="project-item">
-              <div class="project-info">
-                <div class="project-name">{{ project.name }}</div>
-                <div class="project-market">{{ project.market }}</div>
-              </div>
-              <div class="project-status">
-                <mat-chip [color]="getStatusColor(project.status)">
-                  {{ project.status.replace('_', ' ') }}
-                </mat-chip>
-                <div class="progress-bar">
-                  <div class="progress-fill" [style.width.%]="project.progress"></div>
-                </div>
-                <span class="progress-text">{{ project.progress }}%</span>
-              </div>
-            </div>
-          }
-        </div>
-      </mat-card-content>
-    </mat-card>
+  <!-- Loading State -->
+  @if (isLoading) {
+    <div class="loading-container">
+      <mat-spinner></mat-spinner>
+    </div>
+  }
 
-    <!-- Upcoming Tasks -->
-    <mat-card class="content-card">
-      <mat-card-header>
-        <mat-card-title>Upcoming Tasks</mat-card-title>
-        <button mat-button color="primary" routerLink="/tasks">View All</button>
-      </mat-card-header>
-      <mat-card-content>
-        <div class="tasks-list">
-          @for (task of upcomingTasks; track task.id) {
-            <div class="task-item">
-              <div class="task-info">
-                <div class="task-title">{{ task.title }}</div>
-                <div class="task-project">{{ task.project }}</div>
-              </div>
-              <div class="task-meta">
-                <mat-chip [color]="getPriorityColor(task.priority)" class="priority-chip">
-                  {{ task.priority }}
-                </mat-chip>
-                <div class="task-due">
-                  <mat-icon>event</mat-icon>
-                  <span>{{ task.dueDate }}</span>
+  <!-- Recent Markets and Upcoming Tasks -->
+  @if (!isLoading) {
+    <div class="content-grid">
+      <!-- Recent Markets -->
+      <mat-card class="content-card">
+        <mat-card-header>
+          <mat-card-title>Marchés Récents</mat-card-title>
+          <button mat-button color="primary" routerLink="/markets">Voir Tout</button>
+        </mat-card-header>
+        <mat-card-content>
+          <div class="projects-list">
+            @if (recentMarkets.length === 0) {
+              <p class="empty-state">Aucun marché disponible</p>
+            }
+            @for (market of recentMarkets; track market.id_marche) {
+              <div class="project-item" [routerLink]="['/markets', market.id_marche]" style="cursor: pointer;">
+                <div class="project-info">
+                  <div class="project-name">{{ market.intitule }}</div>
+                  <div class="project-market">{{ market.objectif || 'Pas d\'objectif' }}</div>
+                </div>
+                <div class="project-status">
+                  <mat-chip [color]="getStatusColor(market.statut)">
+                    {{ getStatusLabel(market.statut) }}
+                  </mat-chip>
+                  <div class="date-info">
+                    <mat-icon>event</mat-icon>
+                    <span>{{ formatDate(market.date_debut) }}</span>
+                  </div>
                 </div>
               </div>
-            </div>
-          }
-        </div>
-      </mat-card-content>
-    </mat-card>
-  </div>
+            }
+          </div>
+        </mat-card-content>
+      </mat-card>
+
+      <!-- Upcoming Tasks -->
+      <mat-card class="content-card">
+        <mat-card-header>
+          <mat-card-title>Tâches à Venir</mat-card-title>
+          <button mat-button color="primary" routerLink="/tasks">Voir Tout</button>
+        </mat-card-header>
+        <mat-card-content>
+          <div class="tasks-list">
+            @if (upcomingTasks.length === 0) {
+              <p class="empty-state">Aucune tâche à venir</p>
+            }
+            @for (task of upcomingTasks; track task.id_tache) {
+              <div class="task-item">
+                <div class="task-info">
+                  <div class="task-title">{{ task.titre }}</div>
+                  <div class="task-project">{{ task.description || 'Pas de description' }}</div>
+                </div>
+                <div class="task-meta">
+                  <mat-chip [color]="getPriorityColor(task.priorite)" class="priority-chip">
+                    {{ task.priorite }}
+                  </mat-chip>
+                  <div class="task-due">
+                    <mat-icon>event</mat-icon>
+                    <span>{{ formatDate(task.date_fin) }}</span>
+                  </div>
+                </div>
+              </div>
+            }
+          </div>
+        </mat-card-content>
+      </mat-card>
+    </div>
+  }
 </div>

@@ -1,0 +1,161 @@
+<div class="statistics-container">
+  <div class="header">
+    <div>
+      <h1>Statistiques</h1>
+      <p class="subtitle">Analyse et visualisation des données</p>
+    </div>
+    <button mat-raised-button color="primary" (click)="loadStatistics()">
+      <mat-icon>refresh</mat-icon>
+      Actualiser
+    </button>
+  </div>
+
+  @if (isLoading) {
+    <div class="loading-container">
+      <mat-spinner diameter="50"></mat-spinner>
+      <p>Chargement des statistiques...</p>
+    </div>
+  } @else {
+    <!-- Summary Cards -->
+    <div class="summary-grid">
+      <mat-card class="summary-card">
+        <mat-card-content>
+          <div class="summary-icon markets">
+            <mat-icon>store</mat-icon>
+          </div>
+          <div class="summary-details">
+            <h3>{{ stats.totalMarkets }}</h3>
+            <p>Total Marchés</p>
+          </div>
+        </mat-card-content>
+      </mat-card>
+
+      <mat-card class="summary-card">
+        <mat-card-content>
+          <div class="summary-icon budget">
+            <mat-icon>payments</mat-icon>
+          </div>
+          <div class="summary-details">
+            <h3>{{ formatCurrency(stats.totalBudget) }}</h3>
+            <p>Budget Total</p>
+          </div>
+        </mat-card-content>
+      </mat-card>
+
+      <mat-card class="summary-card">
+        <mat-card-content>
+          <div class="summary-icon tasks">
+            <mat-icon>task_alt</mat-icon>
+          </div>
+          <div class="summary-details">
+            <h3>{{ stats.totalTasks }}</h3>
+            <p>Total Tâches</p>
+          </div>
+        </mat-card-content>
+      </mat-card>
+
+      <mat-card class="summary-card">
+        <mat-card-content>
+          <div class="summary-icon completion">
+            <mat-icon>pie_chart</mat-icon>
+          </div>
+          <div class="summary-details">
+            <h3>{{ stats.completionRate.toFixed(1) }}%</h3>
+            <p>Taux de Complétion</p>
+          </div>
+        </mat-card-content>
+      </mat-card>
+
+      <mat-card class="summary-card">
+        <mat-card-content>
+          <div class="summary-icon average">
+            <mat-icon>calculate</mat-icon>
+          </div>
+          <div class="summary-details">
+            <h3>{{ formatCurrency(stats.averageBudget) }}</h3>
+            <p>Budget Moyen</p>
+          </div>
+        </mat-card-content>
+      </mat-card>
+
+      <mat-card class="summary-card" [class.warning]="stats.overdueTasksCount > 0">
+        <mat-card-content>
+          <div class="summary-icon overdue">
+            <mat-icon>warning</mat-icon>
+          </div>
+          <div class="summary-details">
+            <h3>{{ stats.overdueTasksCount }}</h3>
+            <p>Tâches en Retard</p>
+          </div>
+        </mat-card-content>
+      </mat-card>
+    </div>
+
+    <!-- Charts Grid -->
+    <div class="charts-grid">
+      <!-- Market Status Chart -->
+      <mat-card class="chart-card">
+        <mat-card-header>
+          <mat-card-title>Répartition des Marchés</mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          <div class="chart-wrapper">
+            <canvas baseChart
+              [data]="marketStatusChartData"
+              [type]="marketStatusChartType"
+              [options]="marketStatusChartOptions">
+            </canvas>
+          </div>
+        </mat-card-content>
+      </mat-card>
+
+      <!-- Task Status Chart -->
+      <mat-card class="chart-card">
+        <mat-card-header>
+          <mat-card-title>État des Tâches</mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          <div class="chart-wrapper">
+            <canvas baseChart
+              [data]="taskStatusChartData"
+              [type]="taskStatusChartType"
+              [options]="taskStatusChartOptions">
+            </canvas>
+          </div>
+        </mat-card-content>
+      </mat-card>
+
+      <!-- Budget Chart -->
+      <mat-card class="chart-card full-width">
+        <mat-card-header>
+          <mat-card-title>Top 10 Marchés par Budget</mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          <div class="chart-wrapper">
+            <canvas baseChart
+              [data]="budgetChartData"
+              [type]="budgetChartType"
+              [options]="budgetChartOptions">
+            </canvas>
+          </div>
+        </mat-card-content>
+      </mat-card>
+
+      <!-- Timeline Chart -->
+      <mat-card class="chart-card full-width">
+        <mat-card-header>
+          <mat-card-title>Évolution Temporelle</mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          <div class="chart-wrapper">
+            <canvas baseChart
+              [data]="timelineChartData"
+              [type]="timelineChartType"
+              [options]="timelineChartOptions">
+            </canvas>
+          </div>
+        </mat-card-content>
+      </mat-card>
+    </div>
+  }
+</div>

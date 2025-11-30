@@ -1,0 +1,88 @@
+<div class="employee-list-container">
+  <div class="header">
+    <div>
+      <h1>Employés</h1>
+      <p class="subtitle">Gérez les employés de votre organisation</p>
+    </div>
+    <button mat-raised-button color="primary" (click)="openCreateDialog()">
+      <mat-icon>person_add</mat-icon>
+      Nouvel Employé
+    </button>
+  </div>
+
+  <mat-card>
+    @if (isLoading) {
+      <div class="loading-container">
+        <mat-spinner diameter="50"></mat-spinner>
+        <p>Chargement des employés...</p>
+      </div>
+    } @else if (employees.length === 0) {
+      <div class="empty-state">
+        <mat-icon>people</mat-icon>
+        <h3>Aucun employé trouvé</h3>
+        <p>Commencez par ajouter votre premier employé</p>
+        <button mat-raised-button color="primary" (click)="openCreateDialog()">
+          <mat-icon>person_add</mat-icon>
+          Ajouter un Employé
+        </button>
+      </div>
+    } @else {
+      <table mat-table [dataSource]="employees" class="employees-table">
+        
+        <!-- Nom Column -->
+        <ng-container matColumnDef="nom">
+          <th mat-header-cell *matHeaderCellDef>Nom</th>
+          <td mat-cell *matCellDef="let employee">
+            <strong>{{ employee.nom }}</strong>
+          </td>
+        </ng-container>
+
+        <!-- Prénom Column -->
+        <ng-container matColumnDef="prenom">
+          <th mat-header-cell *matHeaderCellDef>Prénom</th>
+          <td mat-cell *matCellDef="let employee">{{ employee.prenom }}</td>
+        </ng-container>
+
+        <!-- Email Column -->
+        <ng-container matColumnDef="email">
+          <th mat-header-cell *matHeaderCellDef>Email</th>
+          <td mat-cell *matCellDef="let employee">
+            {{ employee.email || 'N/A' }}
+          </td>
+        </ng-container>
+
+        <!-- Poste Column -->
+        <ng-container matColumnDef="poste">
+          <th mat-header-cell *matHeaderCellDef>Poste</th>
+          <td mat-cell *matCellDef="let employee">
+            {{ employee.poste || 'N/A' }}
+          </td>
+        </ng-container>
+
+        <!-- Téléphone Column -->
+        <ng-container matColumnDef="telephone">
+          <th mat-header-cell *matHeaderCellDef>Téléphone</th>
+          <td mat-cell *matCellDef="let employee">
+            {{ employee.telephone || 'N/A' }}
+          </td>
+        </ng-container>
+
+        <!-- Actions Column -->
+        <ng-container matColumnDef="actions">
+          <th mat-header-cell *matHeaderCellDef>Actions</th>
+          <td mat-cell *matCellDef="let employee">
+            <button mat-icon-button (click)="openEditDialog(employee)" matTooltip="Modifier">
+              <mat-icon>edit</mat-icon>
+            </button>
+            <button mat-icon-button color="warn" (click)="deleteEmployee(employee)" matTooltip="Supprimer">
+              <mat-icon>delete</mat-icon>
+            </button>
+          </td>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedColumns;" class="table-row"></tr>
+      </table>
+    }
+  </mat-card>
+</div>

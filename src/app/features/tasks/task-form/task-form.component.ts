@@ -1,14 +1,23 @@
-import { Component, Inject, OnInit } from '@angular/core';
+﻿import { Component, Inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
-import { MAT_DIALOG_DATA, MatDialogRef, MatDialogModule } from '@angular/material/dialog';
+import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { MatDialogRef, MAT_DIALOG_DATA, MatDialogModule } from '@angular/material/dialog';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
 import { MatSelectModule } from '@angular/material/select';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatNativeDateModule } from '@angular/material/core';
+import { MatCheckboxModule } from '@angular/material/checkbox';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { Task } from '../../../core/models/task.model';
+import { Market } from '../../../core/models/market.model';
+import { Employee } from '../../../core/models/employee.model';
+import { MarketService } from '../../../core/services/market.service';
+import { EmployeeService } from '../../../core/services/employee.service';
+import { TaskService } from '../../../core/services/task.service';
+import { forkJoin } from 'rxjs';
 
 @Component({
   selector: 'app-task-form',
@@ -22,72 +31,118 @@ import { Task } from '../../../core/models/task.model';
     MatButtonModule,
     MatSelectModule,
     MatDatepickerModule,
-    MatNativeDateModule
+    MatNativeDateModule,
+    MatCheckboxModule,
+    MatProgressSpinnerModule,
+    MatSnackBarModule
   ],
   templateUrl: './task-form.component.html',
   styleUrls: ['./task-form.component.scss']
 })
 export class TaskFormComponent implements OnInit {
   taskForm: FormGroup;
-  isEditMode: boolean;
+  isEditMode: boolean = false;
+  isLoading = true;
+  isSaving = false;
   
-  statusOptions = [
-    { value: 'TODO', label: 'To Do' },
-    { value: 'IN_PROGRESS', label: 'In Progress' },
-    { value: 'REVIEW', label: 'Review' },
-    { value: 'DONE', label: 'Done' }
-  ];
-
-  priorityOptions = [
-    { value: 'LOW', label: 'Low' },
-    { value: 'MEDIUM', label: 'Medium' },
-    { value: 'HIGH', label: 'High' },
-    { value: 'URGENT', label: 'Urgent' }
-  ];
-
-  projectOptions = [
-    { value: 1, label: 'E-commerce Platform' },
-    { value: 2, label: 'Mobile App Development' },
-    { value: 3, label: 'Marketing Campaign Q4' },
-    { value: 4, label: 'Data Analytics Dashboard' }
-  ];
+  states = ['En attente', 'En cours', 'Validée', 'Non validée'];
+  priorities = ['Urgent', 'Quotidien', 'Informatif'];
+  relevances = ['Pertinente', 'Non pertinente', 'À revoir'];
+  
+  markets: Market[] = [];
+  employees: Employee[] = [];
 
   constructor(
     private fb: FormBuilder,
+    private marketService: MarketService,
+    private employeeService: EmployeeService,
+    private taskService: TaskService,
+    private snackBar: MatSnackBar,
     public dialogRef: MatDialogRef<TaskFormComponent>,
     @Inject(MAT_DIALOG_DATA) public data: { task?: Task }
   ) {
     this.isEditMode = !!data?.task;
     
+    const responsableId = typeof data?.task?.responsable === 'number' 
+      ? data?.task?.responsable 
+      : data?.task?.responsable?.id_employe || null;
+    
     this.taskForm = this.fb.group({
-      title: [data?.task?.title || '', [Validators.required, Validators.minLength(3)]],
-      description: [data?.task?.description || '', [Validators.required, Validators.minLength(10)]],
-      projectId: [data?.task?.projectId || 1, Validators.required],
-      status: [data?.task?.status || 'TODO', Validators.required],
-      priority: [data?.task?.priority || 'MEDIUM', Validators.required],
-      dueDate: [data?.task?.dueDate || null]
+      titre: [data?.task?.titre || '', [Validators.required, Validators.minLength(3)]],
+      description: [data?.task?.description || ''],
+      id_marche: [data?.task?.id_marche || null, Validators.required],
+      etat: [data?.task?.etat || 'En attente', Validators.required],
+      priorite: [data?.task?.priorite || 'Quotidien', Validators.required],
+      date_debut: [data?.task?.date_debut || '', Validators.required],
+      date_fin: [data?.task?.date_fin || '', Validators.required],
+      duree_estimee: [data?.task?.duree_estimee || null],
+      responsable: [responsableId, Validators.required],
+      critique: [data?.task?.critique || false],
+      pertinence: [data?.task?.pertinence || 'Pertinente']
     });
   }
 
-  ngOnInit(): void {}
+  ngOnInit(): void {
+    this.loadFormData();
+  }
+
+  loadFormData(): void {
+    forkJoin({
+      markets: this.marketService.getAllMarkets(),
+      employees: this.employeeService.getAllEmployees()
+    }).subscribe({
+      next: (data) => {
+        this.markets = data.markets;
+        this.employees = data.employees;
+        this.isLoading = false;
+      },
+      error: (error) => {
+        console.error('Error loading form data:', error);
+        this.snackBar.open('Erreur lors du chargement des données', 'Fermer', {
+          duration: 3000
+        });
+        this.isLoading = false;
+      }
+    });
+  }
 
   onSubmit(): void {
-    if (this.taskForm.valid) {
+    if (this.taskForm.valid && !this.isSaving) {
+      this.isSaving = true;
       const formValue = this.taskForm.value;
       
-      if (this.isEditMode) {
-        const updatedTask: Task = {
-          ...this.data.task!,
-          ...formValue
-        };
-        this.dialogRef.close(updatedTask);
+      if (this.isEditMode && this.data.task?.id_tache) {
+        this.taskService.updateTask(this.data.task.id_tache, formValue).subscribe({
+          next: (response) => {
+            this.snackBar.open('Tâche mise à jour avec succès', 'Fermer', {
+              duration: 3000
+            });
+            this.dialogRef.close(response);
+          },
+          error: (error) => {
+            console.error('Error updating task:', error);
+            this.snackBar.open('Erreur lors de la mise à jour', 'Fermer', {
+              duration: 3000
+            });
+            this.isSaving = false;
+          }
+        });
       } else {
-        const newTask: Task = {
-          id: Math.floor(Math.random() * 10000),
-          ...formValue,
-          createdAt: new Date()
-        };
-        this.dialogRef.close(newTask);
+        this.taskService.createTask(formValue).subscribe({
+          next: (response) => {
+            this.snackBar.open('Tâche créée avec succès', 'Fermer', {
+              duration: 3000
+            });
+            this.dialogRef.close(response);
+          },
+          error: (error) => {
+            console.error('Error creating task:', error);
+            this.snackBar.open('Erreur lors de la création', 'Fermer', {
+              duration: 3000
+            });
+            this.isSaving = false;
+          }
+        });
       }
     }
   }

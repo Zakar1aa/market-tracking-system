@@ -1,0 +1,64 @@
+<h2 mat-dialog-title>
+  <mat-icon>fact_check</mat-icon>
+  Approbation de la Tâche
+</h2>
+
+<mat-dialog-content>
+  <div class="task-info">
+    <h3>{{ data.task.titre }}</h3>
+    <p class="task-description">{{ data.task.description }}</p>
+  </div>
+
+  <form [formGroup]="approvalForm" class="approval-form">
+    <mat-radio-group formControlName="decision" (change)="onDecisionChange()">
+      <mat-radio-button [value]="ApprovalStatus.APPROUVE" class="approval-option approve">
+        <div class="option-content">
+          <mat-icon>check_circle</mat-icon>
+          <div>
+            <strong>Approuver</strong>
+            <p>La tâche répond aux besoins</p>
+          </div>
+        </div>
+      </mat-radio-button>
+
+      <mat-radio-button [value]="ApprovalStatus.REJETE" class="approval-option reject">
+        <div class="option-content">
+          <mat-icon>cancel</mat-icon>
+          <div>
+            <strong>Rejeter</strong>
+            <p>La tâche ne répond pas aux besoins</p>
+          </div>
+        </div>
+      </mat-radio-button>
+    </mat-radio-group>
+
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Commentaire</mat-label>
+      <textarea 
+        matInput 
+        formControlName="commentaire" 
+        rows="4"
+        [placeholder]="approvalForm.get('decision')?.value === ApprovalStatus.REJETE ? 'Expliquez pourquoi (obligatoire)' : 'Ajoutez un commentaire (optionnel)'">
+      </textarea>
+      @if (approvalForm.get('commentaire')?.hasError('required')) {
+        <mat-error>Un commentaire est obligatoire pour le rejet</mat-error>
+      }
+    </mat-form-field>
+  </form>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-button (click)="onCancel()" [disabled]="isSaving">
+    Annuler
+  </button>
+  <button 
+    mat-raised-button 
+    [color]="approvalForm.get('decision')?.value === ApprovalStatus.APPROUVE ? 'primary' : 'warn'"
+    (click)="onSubmit()" 
+    [disabled]="!approvalForm.valid || isSaving">
+    @if (isSaving) {
+      <mat-spinner diameter="20" style="display: inline-block; margin-right: 8px;"></mat-spinner>
+    }
+    {{ approvalForm.get('decision')?.value === ApprovalStatus.APPROUVE ? 'Approuver' : 'Rejeter' }}
+  </button>
+</mat-dialog-actions>

@@ -1,0 +1,77 @@
+<div class="service-list-container">
+  <div class="header">
+    <div>
+      <h1>Services</h1>
+      <p class="subtitle">Gérez les services/départements de votre organisation</p>
+    </div>
+    <button mat-raised-button color="primary" (click)="openCreateDialog()">
+      <mat-icon>add</mat-icon>
+      Nouveau Service
+    </button>
+  </div>
+
+  <mat-card>
+    @if (isLoading) {
+      <div class="loading-container">
+        <mat-spinner diameter="50"></mat-spinner>
+        <p>Chargement des services...</p>
+      </div>
+    } @else if (services.length === 0) {
+      <div class="empty-state">
+        <mat-icon>business</mat-icon>
+        <h3>Aucun service trouvé</h3>
+        <p>Commencez par créer votre premier service</p>
+        <button mat-raised-button color="primary" (click)="openCreateDialog()">
+          <mat-icon>add</mat-icon>
+          Créer un Service
+        </button>
+      </div>
+    } @else {
+      <table mat-table [dataSource]="services" class="services-table">
+        
+        <!-- Nom Column -->
+        <ng-container matColumnDef="nom">
+          <th mat-header-cell *matHeaderCellDef>Nom du Service</th>
+          <td mat-cell *matCellDef="let service">
+            <div class="service-name">
+              <mat-icon>business</mat-icon>
+              <strong>{{ service.nom }}</strong>
+            </div>
+          </td>
+        </ng-container>
+
+        <!-- Description Column -->
+        <ng-container matColumnDef="description">
+          <th mat-header-cell *matHeaderCellDef>Description</th>
+          <td mat-cell *matCellDef="let service">
+            {{ service.description || 'Aucune description' }}
+          </td>
+        </ng-container>
+
+        <!-- Created At Column -->
+        <ng-container matColumnDef="created_at">
+          <th mat-header-cell *matHeaderCellDef>Créé le</th>
+          <td mat-cell *matCellDef="let service">
+            {{ service.created_at | date:'dd/MM/yyyy' }}
+          </td>
+        </ng-container>
+
+        <!-- Actions Column -->
+        <ng-container matColumnDef="actions">
+          <th mat-header-cell *matHeaderCellDef>Actions</th>
+          <td mat-cell *matCellDef="let service">
+            <button mat-icon-button (click)="openEditDialog(service)" matTooltip="Modifier">
+              <mat-icon>edit</mat-icon>
+            </button>
+            <button mat-icon-button color="warn" (click)="deleteService(service)" matTooltip="Supprimer">
+              <mat-icon>delete</mat-icon>
+            </button>
+          </td>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedColumns;" class="table-row"></tr>
+      </table>
+    }
+  </mat-card>
+</div>

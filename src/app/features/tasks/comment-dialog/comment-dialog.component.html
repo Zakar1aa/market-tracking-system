@@ -1,0 +1,101 @@
+<div class="comment-dialog">
+  <div class="dialog-header">
+    <h2 mat-dialog-title>
+      <mat-icon>comment</mat-icon>
+      Commentaires - {{ data.taskTitle }}
+    </h2>
+    <button mat-icon-button (click)="close()">
+      <mat-icon>close</mat-icon>
+    </button>
+  </div>
+
+  <mat-dialog-content>
+    <!-- Add Comment Form -->
+    <div class="add-comment-section">
+      <h3>Ajouter un commentaire</h3>
+      <form [formGroup]="commentForm" (ngSubmit)="addComment()">
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Type de commentaire</mat-label>
+          <mat-select formControlName="type">
+            <mat-option *ngFor="let type of commentTypes" [value]="type">
+              <mat-icon [color]="getTypeColor(type)">{{ getTypeIcon(type) }}</mat-icon>
+              {{ type }}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Votre commentaire</mat-label>
+          <textarea 
+            matInput 
+            formControlName="contenu" 
+            rows="3"
+            placeholder="Entrez votre commentaire..."></textarea>
+          <mat-error *ngIf="commentForm.get('contenu')?.hasError('required')">
+            Le commentaire est requis
+          </mat-error>
+          <mat-error *ngIf="commentForm.get('contenu')?.hasError('minlength')">
+            Minimum 3 caractères
+          </mat-error>
+        </mat-form-field>
+
+        <button 
+          mat-raised-button 
+          color="primary" 
+          type="submit"
+          [disabled]="!commentForm.valid">
+          <mat-icon>add_comment</mat-icon>
+          Ajouter
+        </button>
+      </form>
+    </div>
+
+    <!-- Comments List -->
+    <div class="comments-list">
+      <h3>Commentaires ({{ comments.length }})</h3>
+      
+      <div *ngIf="isLoading" class="loading">
+        <mat-icon>hourglass_empty</mat-icon>
+        Chargement...
+      </div>
+
+      <div *ngIf="!isLoading && comments.length === 0" class="no-comments">
+        <mat-icon>chat_bubble_outline</mat-icon>
+        <p>Aucun commentaire pour cette tâche</p>
+      </div>
+
+      <div *ngFor="let comment of comments" class="comment-card">
+        <div class="comment-header">
+          <mat-chip [color]="getTypeColor(comment.priorite)" selected>
+            <mat-icon>{{ getTypeIcon(comment.priorite) }}</mat-icon>
+            {{ comment.priorite }}
+          </mat-chip>
+          <button 
+            mat-icon-button 
+            color="warn"
+            (click)="deleteComment(comment.id_commentaire!)"
+            matTooltip="Supprimer">
+            <mat-icon>delete</mat-icon>
+          </button>
+        </div>
+
+        <div class="comment-content">
+          {{ comment.contenu }}
+        </div>
+
+        <div class="comment-footer">
+          <div class="comment-author">
+            <mat-icon class="comment-icon">person</mat-icon>
+            <span class="author-name">
+              {{ comment.auteur?.prenom || 'Employé' }} 
+              {{ comment.auteur?.nom || '#' + comment.id_auteur }}
+            </span>
+          </div>
+          <span class="comment-date">
+            {{ formatDate(comment.created_at) }}
+          </span>
+        </div>
+      </div>
+    </div>
+  </mat-dialog-content>
+</div>

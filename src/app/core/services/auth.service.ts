@@ -1,55 +1,66 @@
-import { Injectable } from '@angular/core';
+﻿import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { BehaviorSubject, Observable, tap } from 'rxjs';
-import { Router } from '@angular/router';
 import { environment } from '../../../environments/environment';
-import { User, LoginRequest, LoginResponse } from '../models/user.model';
+import { LoginRequest, LoginResponse, User, UserRole } from '../models/user.model';
 
 @Injectable({
   providedIn: 'root'
 })
 export class AuthService {
-  private currentUserSubject = new BehaviorSubject<User | null>(null);
+  private apiUrl = `${environment.apiUrl}/auth`;
+  private currentUserSubject = new BehaviorSubject<User | null>(this.getUserFromStorage());
   public currentUser$ = this.currentUserSubject.asObservable();
 
-  constructor(
-    private http: HttpClient,
-    private router: Router
-  ) {
-    // Load user from localStorage on service init
-    const storedUser = localStorage.getItem('currentUser');
-    if (storedUser) {
-      this.currentUserSubject.next(JSON.parse(storedUser));
-    }
+  constructor(private http: HttpClient) {}
+
+  login(username: string, password: string): Observable<LoginResponse> {
+    const request: LoginRequest = { username, password };
+    
+    return this.http.post<LoginResponse>(`${this.apiUrl}/login`, request).pipe(
+      tap(response => {
+        const user: User = {
+          username: response.username,
+          role: response.role as UserRole
+        };
+        localStorage.setItem('currentUser', JSON.stringify(user));
+        this.currentUserSubject.next(user);
+      })
+    );
   }
 
-  login(credentials: LoginRequest): Observable<LoginResponse> {
-    return this.http.post<LoginResponse>(`${environment.apiUrl}/auth/login`, credentials)
-      .pipe(
-        tap(response => {
-          localStorage.setItem('token', response.token);
-          localStorage.setItem('currentUser', JSON.stringify(response.user));
-          this.currentUserSubject.next(response.user);
-        })
-      );
+  // ADD THIS METHOD HERE 👇
+  register(userData: { username: string; password: string; role: UserRole; id_employe?: number }): Observable<any> {
+    return this.http.post(`${this.apiUrl}/register`, userData);
   }
 
   logout(): void {
-    localStorage.removeItem('token');
     localStorage.removeItem('currentUser');
     this.currentUserSubject.next(null);
-    this.router.navigate(['/login']);
-  }
-
-  getToken(): string | null {
-    return localStorage.getItem('token');
   }
 
   isAuthenticated(): boolean {
-    return !!this.getToken();
+    return this.currentUserSubject.value !== null;
   }
 
   getCurrentUser(): User | null {
     return this.currentUserSubject.value;
+  }
+
+  private getUserFromStorage(): User | null {
+    const userJson = localStorage.getItem('currentUser');
+    if (userJson) {
+      try {
+        return JSON.parse(userJson);
+      } catch {
+        return null;
+      }
+    }
+    return null;
+  }
+
+  hasRole(role: UserRole): boolean {
+    const user = this.getCurrentUser();
+    return user?.role === role;
   }
 }

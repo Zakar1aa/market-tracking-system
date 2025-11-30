@@ -1,81 +1,127 @@
-<h2 mat-dialog-title>{{ isEditMode ? 'Edit Task' : 'Create New Task' }}</h2>
+﻿<h2 mat-dialog-title>{{ isEditMode ? "Modifier la Tâche" : "Créer une Tâche" }}</h2>
 
 <mat-dialog-content>
-  <form [formGroup]="taskForm" class="task-form">
-    
-    <mat-form-field appearance="outline">
-      <mat-label>Task Title</mat-label>
-      <input matInput formControlName="title" placeholder="Enter task title">
-      @if (taskForm.get('title')?.hasError('required')) {
-        <mat-error>Task title is required</mat-error>
-      }
-      @if (taskForm.get('title')?.hasError('minlength')) {
-        <mat-error>Task title must be at least 3 characters</mat-error>
-      }
-    </mat-form-field>
-
-    <mat-form-field appearance="outline">
-      <mat-label>Description</mat-label>
-      <textarea 
-        matInput 
-        formControlName="description" 
-        placeholder="Enter task description"
-        rows="3">
-      </textarea>
-      @if (taskForm.get('description')?.hasError('required')) {
-        <mat-error>Description is required</mat-error>
-      }
-      @if (taskForm.get('description')?.hasError('minlength')) {
-        <mat-error>Description must be at least 10 characters</mat-error>
-      }
-    </mat-form-field>
-
-    <mat-form-field appearance="outline">
-      <mat-label>Project</mat-label>
-      <mat-select formControlName="projectId">
-        @for (project of projectOptions; track project.value) {
-          <mat-option [value]="project.value">{{ project.label }}</mat-option>
-        }
-      </mat-select>
-    </mat-form-field>
-
-    <div class="form-row">
-      <mat-form-field appearance="outline">
-        <mat-label>Status</mat-label>
-        <mat-select formControlName="status">
-          @for (status of statusOptions; track status.value) {
-            <mat-option [value]="status.value">{{ status.label }}</mat-option>
-          }
-        </mat-select>
-      </mat-form-field>
-
-      <mat-form-field appearance="outline">
-        <mat-label>Priority</mat-label>
-        <mat-select formControlName="priority">
-          @for (priority of priorityOptions; track priority.value) {
-            <mat-option [value]="priority.value">{{ priority.label }}</mat-option>
-          }
-        </mat-select>
-      </mat-form-field>
+  @if (isLoading) {
+    <div class="loading-container">
+      <mat-spinner diameter="40"></mat-spinner>
+      <p>Chargement...</p>
     </div>
+  } @else {
+    <form [formGroup]="taskForm" class="task-form">
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Titre *</mat-label>
+        <input matInput formControlName="titre" placeholder="Titre de la tâche">
+        @if (taskForm.get("titre")?.hasError("required")) {
+          <mat-error>Le titre est requis</mat-error>
+        }
+        @if (taskForm.get("titre")?.hasError("minlength")) {
+          <mat-error>Le titre doit contenir au moins 3 caractères</mat-error>
+        }
+      </mat-form-field>
 
-    <mat-form-field appearance="outline">
-      <mat-label>Due Date</mat-label>
-      <input matInput [matDatepicker]="duePicker" formControlName="dueDate">
-      <mat-datepicker-toggle matIconSuffix [for]="duePicker"></mat-datepicker-toggle>
-      <mat-datepicker #duePicker></mat-datepicker>
-    </mat-form-field>
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Description</mat-label>
+        <textarea matInput formControlName="description" placeholder="Description de la tâche" rows="3"></textarea>
+      </mat-form-field>
 
-  </form>
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Marché *</mat-label>
+        <mat-select formControlName="id_marche" placeholder="Sélectionner un marché">
+          @for (market of markets; track market.id_marche) {
+            <mat-option [value]="market.id_marche">
+              {{ market.intitule }}
+            </mat-option>
+          }
+        </mat-select>
+        @if (taskForm.get("id_marche")?.hasError("required")) {
+          <mat-error>Le marché est requis</mat-error>
+        }
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Responsable *</mat-label>
+        <mat-select formControlName="responsable" placeholder="Sélectionner un responsable">
+          @for (employee of employees; track employee.id_employe) {
+            <mat-option [value]="employee.id_employe">
+              {{ employee.prenom }} {{ employee.nom }}
+            </mat-option>
+          }
+        </mat-select>
+        @if (taskForm.get("responsable")?.hasError("required")) {
+          <mat-error>Le responsable est requis</mat-error>
+        }
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>État *</mat-label>
+        <mat-select formControlName="etat">
+          @for (state of states; track state) {
+            <mat-option [value]="state">{{ state }}</mat-option>
+          }
+        </mat-select>
+        @if (taskForm.get("etat")?.hasError("required")) {
+          <mat-error>L'état est requis</mat-error>
+        }
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Priorité *</mat-label>
+        <mat-select formControlName="priorite">
+          @for (priority of priorities; track priority) {
+            <mat-option [value]="priority">{{ priority }}</mat-option>
+          }
+        </mat-select>
+        @if (taskForm.get("priorite")?.hasError("required")) {
+          <mat-error>La priorité est requise</mat-error>
+        }
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Pertinence</mat-label>
+        <mat-select formControlName="pertinence">
+          @for (relevance of relevances; track relevance) {
+            <mat-option [value]="relevance">{{ relevance }}</mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+
+      <div class="date-row">
+        <mat-form-field appearance="outline">
+          <mat-label>Date de début *</mat-label>
+          <input matInput type="date" formControlName="date_debut">
+          @if (taskForm.get("date_debut")?.hasError("required")) {
+            <mat-error>La date de début est requise</mat-error>
+          }
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Date de fin *</mat-label>
+          <input matInput type="date" formControlName="date_fin">
+          @if (taskForm.get("date_fin")?.hasError("required")) {
+            <mat-error>La date de fin est requise</mat-error>
+          }
+        </mat-form-field>
+      </div>
+
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Durée estimée (heures)</mat-label>
+        <input matInput type="number" formControlName="duree_estimee" placeholder="Nombre d'heures">
+      </mat-form-field>
+
+      <mat-checkbox formControlName="critique" class="full-width">
+        Tâche critique
+      </mat-checkbox>
+    </form>
+  }
 </mat-dialog-content>
 
 <mat-dialog-actions align="end">
-  <button mat-button (click)="onCancel()">Cancel</button>
-  <button 
-    mat-raised-button 
-    color="primary" 
-    (click)="onSubmit()" 
-    [disabled]="taskForm.invalid">
-    {{ isEditMode ? 'Update' : 'Create' }}
+  <button mat-button (click)="onCancel()" [disabled]="isSaving">Annuler</button>
+  <button mat-raised-button color="primary" (click)="onSubmit()" 
+          [disabled]="!taskForm.valid || isLoading || isSaving">
+    @if (isSaving) {
+      <mat-spinner diameter="20" style="display: inline-block; margin-right: 8px;"></mat-spinner>
+    }
+    {{ isEditMode ? "Mettre à jour" : "Créer" }}
   </button>
 </mat-dialog-actions>
