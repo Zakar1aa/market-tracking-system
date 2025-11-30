@@ -1,38 +1,65 @@
-import { Injectable } from '@angular/core';
+﻿import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { environment } from '../../../environments/environment';
 import { Task } from '../models/task.model';
 
 @Injectable({
   providedIn: 'root'
 })
 export class TaskService {
-  private apiUrl = `${environment.apiUrl}/tasks`;
+  private apiUrl = 'http://localhost:8080/api/taches';
 
   constructor(private http: HttpClient) {}
 
-  getAll(): Observable<Task[]> {
+  getTasks(): Observable<Task[]> {
     return this.http.get<Task[]>(this.apiUrl);
   }
 
-  getById(id: number): Observable<Task> {
+  getAllTasks(): Observable<Task[]> {
+    return this.http.get<Task[]>(this.apiUrl);
+  }
+
+  getTask(id: number): Observable<Task> {
     return this.http.get<Task>(`${this.apiUrl}/${id}`);
   }
 
-  getByProjectId(projectId: number): Observable<Task[]> {
-    return this.http.get<Task[]>(`${this.apiUrl}/project/${projectId}`);
+  createTask(task: Partial<Task>): Observable<Task> {
+    const request: any = {
+      id_marche: task.id_marche,
+      titre: task.titre,
+      description: task.description,
+      date_debut: task.date_debut,
+      date_fin: task.date_fin,
+      duree_estimee: task.duree_estimee,
+      responsable: typeof task.responsable === 'number' ? task.responsable : task.responsable?.id_employe,
+      etat: task.etat,
+      priorite: task.priorite,
+      critique: task.critique || false,
+      pertinence: task.pertinence
+    };
+
+    return this.http.post<Task>(this.apiUrl, request);
   }
 
-  create(task: Partial<Task>): Observable<Task> {
-    return this.http.post<Task>(this.apiUrl, task);
+  updateTask(id: number, task: Partial<Task>): Observable<Task> {
+    const request: any = {
+      id_marche: task.id_marche,
+      titre: task.titre,
+      description: task.description,
+      date_debut: task.date_debut,
+      date_fin: task.date_fin,
+      duree_estimee: task.duree_estimee,
+      responsable: typeof task.responsable === 'number' ? task.responsable : task.responsable?.id_employe,
+      etat: task.etat,
+      priorite: task.priorite,
+      critique: task.critique,
+      pertinence: task.pertinence
+    };
+
+    return this.http.put<Task>(`${this.apiUrl}/${id}`, request);
   }
 
-  update(id: number, task: Partial<Task>): Observable<Task> {
-    return this.http.put<Task>(`${this.apiUrl}/${id}`, task);
-  }
-
-  delete(id: number): Observable<void> {
+  deleteTask(id: number): Observable<void> {
     return this.http.delete<void>(`${this.apiUrl}/${id}`);
   }
 }

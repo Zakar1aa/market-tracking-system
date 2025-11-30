@@ -1,57 +1,145 @@
-<h2 mat-dialog-title>{{ isEditMode ? 'Edit Market' : 'Create New Market' }}</h2>
+﻿<h2 mat-dialog-title>{{ isEditMode ? "Modifier le Marché" : "Créer un Marché" }}</h2>
 
 <mat-dialog-content>
-  <form [formGroup]="marketForm" class="market-form">
-    
-    <mat-form-field appearance="outline">
-      <mat-label>Market Name</mat-label>
-      <input matInput formControlName="name" placeholder="Enter market name">
-      @if (marketForm.get('name')?.hasError('required')) {
-        <mat-error>Market name is required</mat-error>
-      }
-      @if (marketForm.get('name')?.hasError('minlength')) {
-        <mat-error>Market name must be at least 3 characters</mat-error>
-      }
-    </mat-form-field>
-
-    <mat-form-field appearance="outline">
-      <mat-label>Description</mat-label>
-      <textarea 
-        matInput 
-        formControlName="description" 
-        placeholder="Enter market description"
-        rows="4">
-      </textarea>
-      @if (marketForm.get('description')?.hasError('required')) {
-        <mat-error>Description is required</mat-error>
-      }
-      @if (marketForm.get('description')?.hasError('minlength')) {
-        <mat-error>Description must be at least 10 characters</mat-error>
-      }
-    </mat-form-field>
-
-    <mat-form-field appearance="outline">
-      <mat-label>Status</mat-label>
-      <mat-select formControlName="status">
-        @for (status of statusOptions; track status.value) {
-          <mat-option [value]="status.value">{{ status.label }}</mat-option>
+  @if (isLoading) {
+    <div class="loading-container">
+      <mat-spinner diameter="40"></mat-spinner>
+      <p>Chargement...</p>
+    </div>
+  } @else {
+    <form [formGroup]="marketForm" class="market-form">
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Intitulé *</mat-label>
+        <input matInput formControlName="intitule" placeholder="Titre du marché">
+        @if (marketForm.get("intitule")?.hasError("required")) {
+          <mat-error>L'intitulé est requis</mat-error>
         }
-      </mat-select>
-      @if (marketForm.get('status')?.hasError('required')) {
-        <mat-error>Status is required</mat-error>
-      }
-    </mat-form-field>
+        @if (marketForm.get("intitule")?.hasError("minlength")) {
+          <mat-error>L'intitulé doit contenir au moins 3 caractères</mat-error>
+        }
+      </mat-form-field>
 
-  </form>
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Objectif *</mat-label>
+        <textarea matInput formControlName="objectif" placeholder="Objectif du marché" rows="3"></textarea>
+        @if (marketForm.get("objectif")?.hasError("required")) {
+          <mat-error>L'objectif est requis</mat-error>
+        }
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Service *</mat-label>
+        <mat-select formControlName="id_service" placeholder="Sélectionner un service">
+          @for (service of services; track service.id_service) {
+            <mat-option [value]="service.id_service">
+              {{ service.nom }}
+            </mat-option>
+          }
+        </mat-select>
+        @if (marketForm.get("id_service")?.hasError("required")) {
+          <mat-error>Le service est requis</mat-error>
+        }
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Créé par</mat-label>
+        <mat-select formControlName="id_created_by" placeholder="Sélectionner un employé">
+          <mat-option [value]="null">Aucun</mat-option>
+          @for (employee of employees; track employee.id_employe) {
+            <mat-option [value]="employee.id_employe">
+              {{ employee.prenom }} {{ employee.nom }}
+            </mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Statut *</mat-label>
+        <mat-select formControlName="statut">
+          @for (status of statuses; track status) {
+            <mat-option [value]="status">{{ getStatusLabel(status) }}</mat-option>
+          }
+        </mat-select>
+        @if (marketForm.get("statut")?.hasError("required")) {
+          <mat-error>Le statut est requis</mat-error>
+        }
+      </mat-form-field>
+
+      <div class="date-row">
+        <mat-form-field appearance="outline">
+          <mat-label>Date de début *</mat-label>
+          <input matInput type="date" formControlName="date_debut">
+          @if (marketForm.get("date_debut")?.hasError("required")) {
+            <mat-error>La date de début est requise</mat-error>
+          }
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Date de fin *</mat-label>
+          <input matInput type="date" formControlName="date_fin">
+          @if (marketForm.get("date_fin")?.hasError("required")) {
+            <mat-error>La date de fin est requise</mat-error>
+          }
+        </mat-form-field>
+      </div>
+
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Budget estimé (MAD)</mat-label>
+        <input matInput type="number" formControlName="budget_estime" placeholder="Montant du budget">
+        <mat-hint>Budget en dirhams marocains</mat-hint>
+      </mat-form-field>
+
+      <!-- FILE UPLOAD SECTION -->
+      <div class="file-upload-section">
+        <label class="file-upload-label">Document CPS (PDF)</label>
+        
+        @if (existingFilePath && !selectedFile) {
+          <div class="existing-file">
+            <mat-icon>picture_as_pdf</mat-icon>
+            <span>{{ existingFilePath.split('/').pop() }}</span>
+            <button mat-icon-button color="warn" type="button" (click)="removeFile()" matTooltip="Supprimer">
+              <mat-icon>delete</mat-icon>
+            </button>
+          </div>
+        }
+
+        @if (selectedFile) {
+          <div class="selected-file">
+            <mat-icon>picture_as_pdf</mat-icon>
+            <span>{{ selectedFileName }}</span>
+            <button mat-icon-button color="warn" type="button" (click)="removeFile()" matTooltip="Supprimer">
+              <mat-icon>close</mat-icon>
+            </button>
+          </div>
+        }
+
+        @if (!selectedFile && !existingFilePath) {
+          <div class="upload-area">
+            <input 
+              type="file" 
+              accept=".pdf" 
+              (change)="onFileSelected($event)"
+              #fileInput
+              style="display: none;">
+            <button mat-raised-button type="button" (click)="fileInput.click()">
+              <mat-icon>upload_file</mat-icon>
+              Sélectionner un fichier PDF
+            </button>
+            <p class="upload-hint">PDF uniquement, max 10 MB</p>
+          </div>
+        }
+      </div>
+    </form>
+  }
 </mat-dialog-content>
 
 <mat-dialog-actions align="end">
-  <button mat-button (click)="onCancel()">Cancel</button>
-  <button 
-    mat-raised-button 
-    color="primary" 
-    (click)="onSubmit()" 
-    [disabled]="marketForm.invalid">
-    {{ isEditMode ? 'Update' : 'Create' }}
+  <button mat-button (click)="onCancel()" [disabled]="isSaving">Annuler</button>
+  <button mat-raised-button color="primary" (click)="onSubmit()" 
+          [disabled]="!marketForm.valid || isLoading || isSaving">
+    @if (isSaving) {
+      <mat-spinner diameter="20" style="display: inline-block; margin-right: 8px;"></mat-spinner>
+    }
+    {{ isEditMode ? "Mettre à jour" : "Créer" }}
   </button>
 </mat-dialog-actions>

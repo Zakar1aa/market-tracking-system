@@ -28,8 +28,11 @@ export class SidebarComponent {
 
   menuItems: MenuItem[] = [
     { label: 'Dashboard', icon: 'dashboard', route: '/dashboard' },
+    { icon: 'supervisor_account', label: 'Chef Dashboard', route: '/chef-dashboard' },
     { label: 'Markets', icon: 'store', route: '/markets' },
-    { label: 'Projects', icon: 'folder', route: '/projects' },
-    { label: 'Tasks', icon: 'task', route: '/tasks' }
+    { label: 'Tasks', icon: 'task', route: '/tasks' },
+    { label: 'Employees', icon: 'people', route: '/employees' },
+    { label: 'Services', icon: 'business', route: '/services' },
+    { label: 'Statistics', icon: 'bar_chart', route: '/statistics' }
   ];
 }

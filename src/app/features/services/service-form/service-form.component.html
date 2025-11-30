@@ -1,0 +1,51 @@
+<h2 mat-dialog-title>{{ isEditMode ? "Modifier le Service" : "Créer un Service" }}</h2>
+
+<mat-dialog-content>
+  @if (isLoading) {
+    <div class="loading-container">
+      <mat-spinner diameter="40"></mat-spinner>
+      <p>Chargement...</p>
+    </div>
+  } @else {
+    <form [formGroup]="serviceForm" class="service-form">
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Nom du Service *</mat-label>
+        <input matInput formControlName="nom" placeholder="Ex: Direction Informatique">
+        @if (serviceForm.get("nom")?.hasError("required")) {
+          <mat-error>Le nom est requis</mat-error>
+        }
+        @if (serviceForm.get("nom")?.hasError("minlength")) {
+          <mat-error>Le nom doit contenir au moins 3 caractères</mat-error>
+        }
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Description</mat-label>
+        <textarea matInput formControlName="description" placeholder="Description du service" rows="4"></textarea>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Chef de Service</mat-label>
+        <mat-select formControlName="chef_service" placeholder="Sélectionner un chef de service">
+          <mat-option [value]="null">Aucun</mat-option>
+          @for (employee of employees; track employee.id_employe) {
+            <mat-option [value]="employee.id_employe">
+              {{ employee.prenom }} {{ employee.nom }}
+            </mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+    </form>
+  }
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-button (click)="onCancel()" [disabled]="isSaving">Annuler</button>
+  <button mat-raised-button color="primary" (click)="onSubmit()" 
+          [disabled]="!serviceForm.valid || isLoading || isSaving">
+    @if (isSaving) {
+      <mat-spinner diameter="20" style="display: inline-block; margin-right: 8px;"></mat-spinner>
+    }
+    {{ isEditMode ? "Mettre à jour" : "Créer" }}
+  </button>
+</mat-dialog-actions>

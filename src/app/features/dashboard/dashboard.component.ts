@@ -1,32 +1,21 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { MatCardModule } from '@angular/material/card';
-import { MatIconModule } from '@angular/material/icon';
-import { MatButtonModule } from '@angular/material/button';
-import { MatChipsModule } from '@angular/material/chips';
 import { RouterLink } from '@angular/router';
+import { MatCardModule } from '@angular/material/card';
+import { MatButtonModule } from '@angular/material/button';
+import { MatIconModule } from '@angular/material/icon';
+import { MatChipsModule } from '@angular/material/chips';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MarketService } from '../../core/services/market.service';
+import { TaskService } from '../../core/services/task.service';
+import { Market } from '../../core/models/market.model';
+import { Task } from '../../core/models/task.model';
 
 interface DashboardStats {
   totalMarkets: number;
-  activeProjects: number;
+  activeMarkets: number;
   pendingTasks: number;
   completedTasks: number;
-}
-
-interface RecentProject {
-  id: number;
-  name: string;
-  status: string;
-  progress: number;
-  market: string;
-}
-
-interface UpcomingTask {
-  id: number;
-  title: string;
-  project: string;
-  dueDate: string;
-  priority: string;
 }
 
 @Component({
@@ -34,106 +23,126 @@ interface UpcomingTask {
   standalone: true,
   imports: [
     CommonModule,
+    RouterLink,
     MatCardModule,
-    MatIconModule,
     MatButtonModule,
+    MatIconModule,
     MatChipsModule,
-    RouterLink
+    MatProgressSpinnerModule
   ],
   templateUrl: './dashboard.component.html',
   styleUrls: ['./dashboard.component.scss']
 })
 export class DashboardComponent implements OnInit {
   stats: DashboardStats = {
-    totalMarkets: 12,
-    activeProjects: 28,
-    pendingTasks: 45,
-    completedTasks: 156
+    totalMarkets: 0,
+    activeMarkets: 0,
+    pendingTasks: 0,
+    completedTasks: 0
   };
 
-  recentProjects: RecentProject[] = [
-    {
-      id: 1,
-      name: 'E-commerce Platform Redesign',
-      status: 'IN_PROGRESS',
-      progress: 65,
-      market: 'Technology'
-    },
-    {
-      id: 2,
-      name: 'Mobile App Development',
-      status: 'IN_PROGRESS',
-      progress: 40,
-      market: 'Software'
-    },
-    {
-      id: 3,
-      name: 'Marketing Campaign Q4',
-      status: 'PLANNING',
-      progress: 15,
-      market: 'Marketing'
-    },
-    {
-      id: 4,
-      name: 'Data Analytics Dashboard',
-      status: 'IN_PROGRESS',
-      progress: 80,
-      market: 'Analytics'
-    }
-  ];
+  recentMarkets: Market[] = [];
+  upcomingTasks: Task[] = [];
+  isLoading = false;
 
-  upcomingTasks: UpcomingTask[] = [
-    {
-      id: 1,
-      title: 'Complete user authentication',
-      project: 'E-commerce Platform',
-      dueDate: '2025-12-02',
-      priority: 'HIGH'
-    },
-    {
-      id: 2,
-      title: 'Design mobile wireframes',
-      project: 'Mobile App Development',
-      dueDate: '2025-12-03',
-      priority: 'MEDIUM'
-    },
-    {
-      id: 3,
-      title: 'Setup analytics tracking',
-      project: 'Data Analytics Dashboard',
-      dueDate: '2025-12-01',
-      priority: 'URGENT'
-    },
-    {
-      id: 4,
-      title: 'Review marketing content',
-      project: 'Marketing Campaign Q4',
-      dueDate: '2025-12-05',
-      priority: 'LOW'
-    }
-  ];
+  constructor(
+    private marketService: MarketService,
+    private taskService: TaskService
+  ) {}
 
   ngOnInit(): void {
-    // Data is already initialized above with mock data
+    this.loadDashboardData();
+  }
+
+  loadDashboardData(): void {
+    this.isLoading = true;
+    this.loadMarkets();
+    this.loadTasks();
+  }
+
+  loadMarkets(): void {
+    this.marketService.getAllMarkets().subscribe({
+      next: (markets) => {
+        this.stats.totalMarkets = markets.length;
+        this.stats.activeMarkets = markets.filter(m => m.statut === 'En Cours').length;
+        this.recentMarkets = markets
+          .sort((a, b) => new Date(b.created_at || 0).getTime() - new Date(a.created_at || 0).getTime())
+          .slice(0, 4);
+      },
+      error: (error) => {
+        console.error('Error loading markets:', error);
+      }
+    });
+  }
+
+  loadTasks(): void {
+    this.taskService.getAllTasks().subscribe({
+      next: (tasks) => {
+        this.stats.pendingTasks = tasks.filter(t => t.etat === 'En attente').length;
+        this.stats.completedTasks = tasks.filter(t => t.etat === 'Validée').length;
+        
+        this.upcomingTasks = tasks
+          .filter(t => t.etat !== 'Validée')
+          .sort((a, b) => new Date(a.date_fin).getTime() - new Date(b.date_fin).getTime())
+          .slice(0, 5);
+        
+        this.isLoading = false;
+      },
+      error: (error) => {
+        console.error('Error loading tasks:', error);
+        this.isLoading = false;
+      }
+    });
   }
 
   getStatusColor(status: string): string {
-    const colors: { [key: string]: string } = {
-      'PLANNING': 'accent',
-      'IN_PROGRESS': 'primary',
-      'COMPLETED': 'primary',
-      'ON_HOLD': 'warn'
-    };
-    return colors[status] || 'primary';
+    switch (status) {
+      case 'En Cours':
+        return 'primary';
+      case 'Terminé':
+        return 'accent';
+      case 'En Préparation':
+        return 'warn';
+      case 'Annulé':
+        return 'warn';
+      default:
+        return 'primary';
+    }
   }
 
-  getPriorityColor(priority: string): string {
-    const colors: { [key: string]: string } = {
-      'LOW': 'accent',
-      'MEDIUM': 'primary',
-      'HIGH': 'warn',
-      'URGENT': 'warn'
-    };
-    return colors[priority] || 'primary';
+  getStatusLabel(status: string): string {
+    return status;
+  }
+
+  getMarketStatusColor(status: string): string {
+    return this.getStatusColor(status);
+  }
+
+  getPriorityColor(priorite: string): string {
+    switch (priorite) {
+      case 'Urgent':
+        return 'warn';
+      case 'Quotidien':
+        return 'accent';
+      case 'Informatif':
+        return 'primary';
+      default:
+        return 'primary';
+    }
+  }
+
+  formatDate(dateString: string): string {
+    const date = new Date(dateString);
+    return date.toLocaleDateString('fr-FR', {
+      day: '2-digit',
+      month: 'short',
+      year: 'numeric'
+    });
+  }
+
+  isTaskOverdue(task: Task): boolean {
+    const deadline = new Date(task.date_fin);
+    const now = new Date();
+    return deadline < now && task.etat !== 'Validée';
   }
 }

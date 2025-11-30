@@ -1,161 +1,65 @@
-<div class="market-detail-container">
+﻿<div class="market-detail-container">
   @if (market) {
-    <!-- Header -->
-    <div class="header">
-      <button mat-icon-button routerLink="/markets" class="back-button">
-        <mat-icon>arrow_back</mat-icon>
-      </button>
-      <div class="header-content">
-        <div>
-          <h1>{{ market.name }}</h1>
-          <p class="subtitle">Market Details</p>
+    <mat-card class="market-card">
+      <mat-card-header>
+        <div class="header-content">
+          <h1>{{ market.intitule }}</h1>
+          <div class="actions">
+            <button mat-icon-button (click)="editMarket()" matTooltip="Edit Market">
+              <mat-icon>edit</mat-icon>
+            </button>
+            <button mat-icon-button (click)="goBack()" matTooltip="Back to List">
+              <mat-icon>arrow_back</mat-icon>
+            </button>
+          </div>
         </div>
-        <div class="header-actions">
-          <button mat-raised-button color="primary">
-            <mat-icon>edit</mat-icon>
-            Edit
-          </button>
-          <button mat-raised-button color="warn" (click)="deleteMarket()">
-            <mat-icon>delete</mat-icon>
-            Delete
-          </button>
-        </div>
-      </div>
-    </div>
+      </mat-card-header>
 
-    <!-- Market Information -->
-    <div class="content-grid">
-      <mat-card class="info-card">
-        <mat-card-header>
-          <mat-card-title>Market Information</mat-card-title>
-        </mat-card-header>
-        <mat-card-content>
-          <div class="info-row">
-            <span class="label">Name:</span>
-            <span class="value">{{ market.name }}</span>
+      <mat-card-content>
+        <div class="details-grid">
+          <div class="detail-item">
+            <span class="label">Nom:</span>
+            <span class="value">{{ market.intitule }}</span>
           </div>
-          <mat-divider></mat-divider>
-          
-          <div class="info-row">
-            <span class="label">Description:</span>
-            <span class="value">{{ market.description }}</span>
+
+          <div class="detail-item">
+            <span class="label">Objectif:</span>
+            <span class="value">{{ market.objectif }}</span>
           </div>
-          <mat-divider></mat-divider>
-          
-          <div class="info-row">
-            <span class="label">Status:</span>
-            <mat-chip [color]="getStatusColor(market.status)">
-              {{ market.status }}
+
+          <div class="detail-item">
+            <span class="label">Statut:</span>
+            <mat-chip [color]="getStatusColor(market.statut)">
+              {{ market.statut }}
             </mat-chip>
           </div>
-          <mat-divider></mat-divider>
-          
-          <div class="info-row">
-            <span class="label">Created:</span>
-            <span class="value">{{ market.createdAt | date:'full' }}</span>
-          </div>
-          <mat-divider></mat-divider>
-          
-          <div class="info-row">
-            <span class="label">Last Updated:</span>
-            <span class="value">{{ market.updatedAt | date:'full' }}</span>
-          </div>
-        </mat-card-content>
-      </mat-card>
 
-      <!-- Related Projects -->
-      <mat-card class="projects-card">
-        <mat-card-header>
-          <mat-card-title>Related Projects</mat-card-title>
-        </mat-card-header>
-        <mat-card-content>
-          @if (relatedProjects.length > 0) {
-            <div class="projects-list">
-              @for (project of relatedProjects; track project.id) {
-                <div class="project-item">
-                  <div class="project-info">
-                    <div class="project-name">{{ project.name }}</div>
-                    <div class="project-meta">
-                      <mat-chip [color]="getStatusColor(project.status)">
-                        {{ project.status.replace('_', ' ') }}
-                      </mat-chip>
-                      <span class="progress">{{ project.progress }}% complete</span>
-                    </div>
-                  </div>
-                  <button mat-icon-button [routerLink]="['/projects', project.id]">
-                    <mat-icon>arrow_forward</mat-icon>
-                  </button>
-                </div>
-                <mat-divider></mat-divider>
-              }
-            </div>
-          } @else {
-            <div class="empty-state">
-              <mat-icon>folder_open</mat-icon>
-              <p>No projects in this market yet</p>
-            </div>
-          }
-        </mat-card-content>
-      </mat-card>
-    </div>
+          <div class="detail-item">
+            <span class="label">Date de création:</span>
+            <span class="value">{{ market.created_at | date:'full' }}</span>
+          </div>
 
-    <!-- Statistics Section -->
-    <mat-card class="stats-card">
-      <mat-card-header>
-        <mat-card-title>Market Statistics</mat-card-title>
-      </mat-card-header>
-      <mat-card-content>
-        <div class="stats-grid">
-          <div class="stat-item">
-            <div class="stat-icon">
-              <mat-icon>folder</mat-icon>
-            </div>
-            <div class="stat-info">
-              <div class="stat-value">{{ relatedProjects.length }}</div>
-              <div class="stat-label">Active Projects</div>
-            </div>
+          <div class="detail-item">
+            <span class="label">Date de début:</span>
+            <span class="value">{{ market.date_debut | date:'short' }}</span>
           </div>
-          
-          <div class="stat-item">
-            <div class="stat-icon">
-              <mat-icon>task</mat-icon>
-            </div>
-            <div class="stat-info">
-              <div class="stat-value">24</div>
-              <div class="stat-label">Total Tasks</div>
-            </div>
-          </div>
-          
-          <div class="stat-item">
-            <div class="stat-icon">
-              <mat-icon>people</mat-icon>
-            </div>
-            <div class="stat-info">
-              <div class="stat-value">8</div>
-              <div class="stat-label">Team Members</div>
-            </div>
-          </div>
-          
-          <div class="stat-item">
-            <div class="stat-icon">
-              <mat-icon>trending_up</mat-icon>
-            </div>
-            <div class="stat-info">
-              <div class="stat-value">67%</div>
-              <div class="stat-label">Avg. Progress</div>
-            </div>
+
+          <div class="detail-item">
+            <span class="label">Date de fin:</span>
+            <span class="value">{{ market.date_fin | date:'short' }}</span>
           </div>
         </div>
       </mat-card-content>
     </mat-card>
   } @else {
-    <div class="not-found">
-      <mat-icon>error_outline</mat-icon>
-      <h2>Market Not Found</h2>
-      <p>The market you're looking for doesn't exist.</p>
-      <button mat-raised-button color="primary" routerLink="/markets">
-        Back to Markets
-      </button>
-    </div>
+    <mat-card>
+      <mat-card-content>
+        <p>Market not found</p>
+        <button mat-button (click)="goBack()">
+          <mat-icon>arrow_back</mat-icon>
+          Back to List
+        </button>
+      </mat-card-content>
+    </mat-card>
   }
 </div>

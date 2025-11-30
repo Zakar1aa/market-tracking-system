@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+﻿import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { MatTableModule } from '@angular/material/table';
@@ -8,106 +8,65 @@ import { MatChipsModule } from '@angular/material/chips';
 import { MatCardModule } from '@angular/material/card';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { MatTooltipModule } from '@angular/material/tooltip';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
+import { MatBadgeModule } from '@angular/material/badge';
 import { Task } from '../../../core/models/task.model';
+import { TaskService } from '../../../core/services/task.service';
 import { TaskFormComponent } from '../task-form/task-form.component';
+import { ApprovalDialogComponent } from '../approval-dialog/approval-dialog.component';
+import { CommentDialogComponent } from '../comment-dialog/comment-dialog.component';
 
 @Component({
   selector: 'app-task-list',
   standalone: true,
   imports: [
     CommonModule,
-    RouterLink,
     MatTableModule,
     MatButtonModule,
     MatIconModule,
     MatChipsModule,
     MatCardModule,
     MatDialogModule,
-    MatTooltipModule
+    MatTooltipModule,
+    MatProgressSpinnerModule,
+    MatSnackBarModule,
+    MatBadgeModule
   ],
   templateUrl: './task-list.component.html',
   styleUrls: ['./task-list.component.scss']
 })
 export class TaskListComponent implements OnInit {
-  displayedColumns: string[] = ['title', 'project', 'status', 'priority', 'dueDate', 'actions'];
-  
-  tasks: Task[] = [
-    {
-      id: 1,
-      title: 'Complete user authentication',
-      description: 'Implement JWT-based authentication system',
-      projectId: 1,
-      assigneeId: 1,
-      status: 'IN_PROGRESS',
-      priority: 'HIGH',
-      dueDate: new Date('2025-12-02'),
-      createdAt: new Date('2025-11-20')
-    },
-    {
-      id: 2,
-      title: 'Design mobile wireframes',
-      description: 'Create wireframes for all mobile screens',
-      projectId: 2,
-      assigneeId: 2,
-      status: 'TODO',
-      priority: 'MEDIUM',
-      dueDate: new Date('2025-12-03'),
-      createdAt: new Date('2025-11-21')
-    },
-    {
-      id: 3,
-      title: 'Setup analytics tracking',
-      description: 'Configure Google Analytics and event tracking',
-      projectId: 4,
-      assigneeId: 3,
-      status: 'IN_PROGRESS',
-      priority: 'URGENT',
-      dueDate: new Date('2025-12-01'),
-      createdAt: new Date('2025-11-19')
-    },
-    {
-      id: 4,
-      title: 'Review marketing content',
-      description: 'Review and approve Q4 marketing materials',
-      projectId: 3,
-      status: 'REVIEW',
-      priority: 'LOW',
-      dueDate: new Date('2025-12-05'),
-      createdAt: new Date('2025-11-22')
-    },
-    {
-      id: 5,
-      title: 'Database optimization',
-      description: 'Optimize database queries for better performance',
-      projectId: 1,
-      assigneeId: 1,
-      status: 'DONE',
-      priority: 'HIGH',
-      dueDate: new Date('2025-11-28'),
-      createdAt: new Date('2025-11-15')
-    },
-    {
-      id: 6,
-      title: 'API documentation',
-      description: 'Write comprehensive API documentation',
-      projectId: 1,
-      status: 'TODO',
-      priority: 'MEDIUM',
-      dueDate: new Date('2025-12-10'),
-      createdAt: new Date('2025-11-23')
-    }
-  ];
+  displayedColumns: string[] = ['titre', 'etat', 'priorite', 'date_fin', 'actions'];
+  tasks: Task[] = [];
+  isLoading = true;
 
-  projectNames: { [key: number]: string } = {
-    1: 'E-commerce Platform',
-    2: 'Mobile App Development',
-    3: 'Marketing Campaign Q4',
-    4: 'Data Analytics Dashboard'
-  };
+  constructor(
+    private dialog: MatDialog,
+    private taskService: TaskService,
+    private snackBar: MatSnackBar
+  ) {}
 
-  constructor(private dialog: MatDialog) {}
+  ngOnInit(): void {
+    this.loadTasks();
+  }
 
-  ngOnInit(): void {}
+  loadTasks(): void {
+    this.isLoading = true;
+    this.taskService.getAllTasks().subscribe({
+      next: (tasks) => {
+        this.tasks = tasks;
+        this.isLoading = false;
+      },
+      error: (error) => {
+        console.error('Error loading tasks:', error);
+        this.snackBar.open('Erreur lors du chargement des tâches', 'Fermer', {
+          duration: 3000
+        });
+        this.isLoading = false;
+      }
+    });
+  }
 
   openCreateDialog(): void {
     const dialogRef = this.dialog.open(TaskFormComponent, {
@@ -117,9 +76,23 @@ export class TaskListComponent implements OnInit {
 
     dialogRef.afterClosed().subscribe(result => {
       if (result) {
-        this.tasks = [...this.tasks, result as Task];
-        console.log('Task created:', result);
+        this.loadTasks();
       }
+    });
+  }
+
+  openCommentsDialog(task: Task): void {
+    const dialogRef = this.dialog.open(CommentDialogComponent, {
+      width: '700px',
+      maxHeight: '90vh',
+      data: { 
+        taskId: task.id_tache,
+        taskTitle: task.titre
+      }
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      // Comments are handled within the dialog
     });
   }
 
@@ -131,49 +104,79 @@ export class TaskListComponent implements OnInit {
 
     dialogRef.afterClosed().subscribe(result => {
       if (result) {
-        const index = this.tasks.findIndex(t => t.id === result.id);
-        if (index !== -1) {
-          this.tasks[index] = result;
-          this.tasks = [...this.tasks];
-        }
-        console.log('Task updated:', result);
+        this.loadTasks();
       }
     });
   }
 
-  getProjectName(projectId: number): string {
-    return this.projectNames[projectId] || 'Unknown';
+  openApprovalDialog(task: Task): void {
+    const dialogRef = this.dialog.open(ApprovalDialogComponent, {
+      width: '600px',
+      data: { 
+        taskId: task.id_tache,
+        taskTitle: task.titre
+      }
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      if (result) {
+        this.loadTasks();
+        const message = result.statut === 'Approuvé' 
+          ? 'Tâche approuvée avec succès' 
+          : 'Tâche rejetée';
+        this.snackBar.open(message, 'Fermer', {
+          duration: 3000
+        });
+      }
+    });
   }
 
-  getStatusColor(status: string): 'primary' | 'accent' | 'warn' {
-    const colors: { [key: string]: 'primary' | 'accent' | 'warn' } = {
-      'TODO': 'accent',
-      'IN_PROGRESS': 'primary',
-      'REVIEW': 'accent',
-      'DONE': 'primary'
-    };
-    return colors[status] || 'primary';
-  }
-
-  getPriorityColor(priority: string): 'primary' | 'accent' | 'warn' {
-    const colors: { [key: string]: 'primary' | 'accent' | 'warn' } = {
-      'LOW': 'accent',
-      'MEDIUM': 'primary',
-      'HIGH': 'warn',
-      'URGENT': 'warn'
-    };
-    return colors[priority] || 'primary';
-  }
-
-  isOverdue(dueDate?: Date): boolean {
-    if (!dueDate) return false;
-    return new Date(dueDate) < new Date();
-  }
-
-  deleteTask(id: number): void {
-    if (confirm('Are you sure you want to delete this task?')) {
-      this.tasks = this.tasks.filter(t => t.id !== id);
-      console.log('Task deleted:', id);
+  deleteTask(task: Task): void {
+    if (confirm(`Êtes-vous sûr de vouloir supprimer la tâche "${task.titre}" ?`)) {
+      this.taskService.deleteTask(task.id_tache!).subscribe({
+        next: () => {
+          this.loadTasks();
+          this.snackBar.open('Tâche supprimée avec succès', 'Fermer', {
+            duration: 3000
+          });
+        },
+        error: (error) => {
+          console.error('Error deleting task:', error);
+          this.snackBar.open('Erreur lors de la suppression de la tâche', 'Fermer', {
+            duration: 3000
+          });
+        }
+      });
     }
+  }
+
+  getStateColor(state: string): string {
+    switch (state) {
+      case 'En attente': return 'warn';
+      case 'En cours': return 'primary';
+      case 'Validée': return 'primary';
+      case 'Non validée': return 'warn';
+      default: return 'primary';
+    }
+  }
+
+  getPriorityColor(priority: string): string {
+    switch (priority) {
+      case 'Urgent': return 'warn';
+      case 'Quotidien': return 'accent';
+      case 'Informatif': return 'primary';
+      default: return 'primary';
+    }
+  }
+
+  isOverdue(task: Task): boolean {
+    if (!task.date_fin || task.etat === 'Validée') return false;
+    const today = new Date();
+    const dueDate = new Date(task.date_fin);
+    return dueDate < today;
+  }
+
+  canApprove(task: Task): boolean {
+    return task.etat === 'En cours';
   }
 }

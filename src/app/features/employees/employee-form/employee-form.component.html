@@ -1,0 +1,77 @@
+<h2 mat-dialog-title>{{ isEditMode ? "Modifier l'Employé" : "Ajouter un Employé" }}</h2>
+
+<mat-dialog-content>
+  @if (isLoading) {
+    <div class="loading-container">
+      <mat-spinner diameter="40"></mat-spinner>
+      <p>Chargement...</p>
+    </div>
+  } @else {
+    <form [formGroup]="employeeForm" class="employee-form">
+      <div class="name-row">
+        <mat-form-field appearance="outline">
+          <mat-label>Nom *</mat-label>
+          <input matInput formControlName="nom" placeholder="Nom de famille">
+          @if (employeeForm.get("nom")?.hasError("required")) {
+            <mat-error>Le nom est requis</mat-error>
+          }
+          @if (employeeForm.get("nom")?.hasError("minlength")) {
+            <mat-error>Le nom doit contenir au moins 2 caractères</mat-error>
+          }
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Prénom *</mat-label>
+          <input matInput formControlName="prenom" placeholder="Prénom">
+          @if (employeeForm.get("prenom")?.hasError("required")) {
+            <mat-error>Le prénom est requis</mat-error>
+          }
+          @if (employeeForm.get("prenom")?.hasError("minlength")) {
+            <mat-error>Le prénom doit contenir au moins 2 caractères</mat-error>
+          }
+        </mat-form-field>
+      </div>
+
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Email</mat-label>
+        <input matInput type="email" formControlName="email" placeholder="email@example.com">
+        @if (employeeForm.get("email")?.hasError("email")) {
+          <mat-error>Email invalide</mat-error>
+        }
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Téléphone</mat-label>
+        <input matInput formControlName="telephone" placeholder="+212 6 XX XX XX XX">
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Poste</mat-label>
+        <input matInput formControlName="poste" placeholder="Ex: Développeur, Chef de projet">
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Service</mat-label>
+        <mat-select formControlName="id_service" placeholder="Sélectionner un service">
+          <mat-option [value]="null">Aucun</mat-option>
+          @for (service of services; track service.id_service) {
+            <mat-option [value]="service.id_service">
+              {{ service.nom }}
+            </mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+    </form>
+  }
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-button (click)="onCancel()" [disabled]="isSaving">Annuler</button>
+  <button mat-raised-button color="primary" (click)="onSubmit()" 
+          [disabled]="!employeeForm.valid || isLoading || isSaving">
+    @if (isSaving) {
+      <mat-spinner diameter="20" style="display: inline-block; margin-right: 8px;"></mat-spinner>
+    }
+    {{ isEditMode ? "Mettre à jour" : "Créer" }}
+  </button>
+</mat-dialog-actions>

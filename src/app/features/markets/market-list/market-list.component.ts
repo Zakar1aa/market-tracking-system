@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+﻿import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { MatTableModule } from '@angular/material/table';
@@ -8,7 +8,10 @@ import { MatChipsModule } from '@angular/material/chips';
 import { MatCardModule } from '@angular/material/card';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { MatTooltipModule } from '@angular/material/tooltip';
-import { Market } from '../../../core/models/market.model';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
+import { Market, MarketStatus } from '../../../core/models/market.model';
+import { MarketService } from '../../../core/services/market.service';
 import { MarketFormComponent } from '../market-form/market-form.component';
 
 @Component({
@@ -23,61 +26,44 @@ import { MarketFormComponent } from '../market-form/market-form.component';
     MatChipsModule,
     MatCardModule,
     MatDialogModule,
-    MatTooltipModule
+    MatTooltipModule,
+    MatProgressSpinnerModule,
+    MatSnackBarModule
   ],
   templateUrl: './market-list.component.html',
   styleUrls: ['./market-list.component.scss']
 })
 export class MarketListComponent implements OnInit {
-  displayedColumns: string[] = ['name', 'description', 'status', 'createdAt', 'actions'];
-  
-  markets: Market[] = [
-    {
-      id: 1,
-      name: 'Technology',
-      description: 'Technology and software development market',
-      status: 'ACTIVE',
-      createdAt: new Date('2025-01-15'),
-      updatedAt: new Date('2025-11-20')
-    },
-    {
-      id: 2,
-      name: 'Healthcare',
-      description: 'Healthcare and medical services market',
-      status: 'ACTIVE',
-      createdAt: new Date('2025-02-10'),
-      updatedAt: new Date('2025-11-18')
-    },
-    {
-      id: 3,
-      name: 'Finance',
-      description: 'Financial services and banking market',
-      status: 'ACTIVE',
-      createdAt: new Date('2025-03-05'),
-      updatedAt: new Date('2025-11-15')
-    },
-    {
-      id: 4,
-      name: 'E-commerce',
-      description: 'Online retail and shopping platforms',
-      status: 'PENDING',
-      createdAt: new Date('2025-10-20'),
-      updatedAt: new Date('2025-11-25')
-    },
-    {
-      id: 5,
-      name: 'Education',
-      description: 'Educational technology and learning platforms',
-      status: 'INACTIVE',
-      createdAt: new Date('2025-04-12'),
-      updatedAt: new Date('2025-09-30')
-    }
-  ];
+  displayedColumns: string[] = ['intitule', 'objectif', 'statut', 'created_at', 'actions'];
+  markets: Market[] = [];
+  isLoading = true;
 
-  constructor(private dialog: MatDialog) {}
+  constructor(
+    private dialog: MatDialog,
+    private marketService: MarketService,
+    private snackBar: MatSnackBar
+  ) {}
 
   ngOnInit(): void {
-    // Mock data is already loaded above
+    this.loadMarkets();
+  }
+
+  loadMarkets(): void {
+    this.isLoading = true;
+    this.marketService.getAllMarkets().subscribe({
+      next: (markets) => {
+        this.markets = markets;
+        this.isLoading = false;
+      },
+      error: (error) => {
+        console.error('Error loading markets:', error);
+        this.snackBar.open('Erreur lors du chargement des marchés', 'Fermer', {
+          duration: 3000,
+          panelClass: ['error-snackbar']
+        });
+        this.isLoading = false;
+      }
+    });
   }
 
   openCreateDialog(): void {
@@ -88,8 +74,11 @@ export class MarketListComponent implements OnInit {
 
     dialogRef.afterClosed().subscribe(result => {
       if (result) {
-        this.markets = [...this.markets, result as Market];
-        console.log('Market created:', result);
+        this.loadMarkets(); // Reload the list
+        this.snackBar.open('Marché créé avec succès', 'Fermer', {
+          duration: 3000,
+          panelClass: ['success-snackbar']
+        });
       }
     });
   }
@@ -102,29 +91,53 @@ export class MarketListComponent implements OnInit {
 
     dialogRef.afterClosed().subscribe(result => {
       if (result) {
-        const index = this.markets.findIndex(m => m.id === result.id);
-        if (index !== -1) {
-          this.markets[index] = result;
-          this.markets = [...this.markets]; // Trigger change detection
-        }
-        console.log('Market updated:', result);
+        this.loadMarkets(); // Reload the list
+        this.snackBar.open('Marché mis à jour avec succès', 'Fermer', {
+          duration: 3000,
+          panelClass: ['success-snackbar']
+        });
       }
     });
   }
 
-  getStatusColor(status: string): 'primary' | 'accent' | 'warn' {
-    const colors: { [key: string]: 'primary' | 'accent' | 'warn' } = {
-      'ACTIVE': 'primary',
-      'PENDING': 'accent',
-      'INACTIVE': 'warn'
+  deleteMarket(market: Market): void {
+    if (confirm(`Êtes-vous sûr de vouloir supprimer le marché "${market.intitule}" ?`)) {
+      this.marketService.deleteMarket(market.id_marche!).subscribe({
+        next: () => {
+          this.loadMarkets(); // Reload the list
+          this.snackBar.open('Marché supprimé avec succès', 'Fermer', {
+            duration: 3000,
+            panelClass: ['success-snackbar']
+          });
+        },
+        error: (error) => {
+          console.error('Error deleting market:', error);
+          this.snackBar.open('Erreur lors de la suppression du marché', 'Fermer', {
+            duration: 3000,
+            panelClass: ['error-snackbar']
+          });
+        }
+      });
+    }
+  }
+
+  getStatusColor(status: MarketStatus): string {
+    const colors: Record<MarketStatus, string> = {
+      [MarketStatus.EN_PREPARATION]: 'accent',
+      [MarketStatus.EN_COURS]: 'primary',
+      [MarketStatus.TERMINE]: 'primary',
+      [MarketStatus.ANNULE]: 'warn'
     };
     return colors[status] || 'primary';
   }
 
-  deleteMarket(id: number): void {
-    if (confirm('Are you sure you want to delete this market?')) {
-      this.markets = this.markets.filter(m => m.id !== id);
-      console.log('Market deleted:', id);
-    }
+  getStatusLabel(status: MarketStatus): string {
+    const labels: Record<MarketStatus, string> = {
+      [MarketStatus.EN_PREPARATION]: 'En Préparation',
+      [MarketStatus.EN_COURS]: 'En Cours',
+      [MarketStatus.TERMINE]: 'Terminé',
+      [MarketStatus.ANNULE]: 'Annulé'
+    };
+    return labels[status] || status;
   }
 }
