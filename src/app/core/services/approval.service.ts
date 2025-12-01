@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
-import { Approval, ApprovalStatus } from '../models/approval.model';
+import { Approval } from '../models/approval.model';
 
 @Injectable({
   providedIn: 'root'
@@ -20,60 +20,74 @@ export class ApprovalService {
     return this.http.get<Approval>(`${this.apiUrl}/${id}`);
   }
 
-  getApprovalsByTask(idTache: number): Observable<Approval[]> {
-    return this.http.get<Approval[]>(`${this.apiUrl}/tache/${idTache}`);
+  getApprovalsByMarket(idMarche: number): Observable<Approval[]> {
+    return this.http.get<Approval[]>(`${this.apiUrl}/marche/${idMarche}`);
   }
 
   getApprovalsByEmployee(idEmploye: number): Observable<Approval[]> {
     return this.http.get<Approval[]>(`${this.apiUrl}/employe/${idEmploye}`);
   }
 
-  createApproval(approval: Approval): Observable<Approval> {
-    // Transform to backend format (camelCase)
-    const request = {
-      idTache: approval.id_tache,
+  getApprovalsByStatus(statut: string): Observable<Approval[]> {
+    return this.http.get<Approval[]>(`${this.apiUrl}/statut/${statut}`);
+  }
+
+  getApprovedApprovals(): Observable<Approval[]> {
+    return this.http.get<Approval[]>(`${this.apiUrl}/approuvees`);
+  }
+
+  getRejectedApprovals(): Observable<Approval[]> {
+    return this.http.get<Approval[]>(`${this.apiUrl}/refusees`);
+  }
+
+  getMarketStatistics(idMarche: number): Observable<any> {
+    return this.http.get<any>(`${this.apiUrl}/marche/${idMarche}/statistiques`);
+  }
+
+  checkApprovalExists(idMarche: number, idEmploye: number): Observable<any> {
+    return this.http.get<any>(`${this.apiUrl}/marche/${idMarche}/employe/${idEmploye}/existe`);
+  }
+
+  createApproval(approval: Approval): Observable<any> {
+    // Backend expects: idMarche, idEmploye, statut, motif (optional)
+    const payload = {
+      idMarche: approval.id_marche,
       idEmploye: approval.id_employe,
       statut: approval.statut,
-      commentaire: approval.commentaire,
-      dateApprobation: approval.date_approbation
+      motif: approval.motif || null
     };
-    return this.http.post<Approval>(this.apiUrl, request);
+    return this.http.post<any>(this.apiUrl, payload);
   }
 
-  updateApproval(id: number, approval: Partial<Approval>): Observable<Approval> {
-    const request: any = {};
-    if (approval.id_tache) request.idTache = approval.id_tache;
-    if (approval.id_employe) request.idEmploye = approval.id_employe;
-    if (approval.statut) request.statut = approval.statut;
-    if (approval.commentaire !== undefined) request.commentaire = approval.commentaire;
-    if (approval.date_approbation) request.dateApprobation = approval.date_approbation;
+  updateApproval(id: number, approval: Partial<Approval>): Observable<any> {
+    const payload: any = {};
+    if (approval.statut) payload.statut = approval.statut;
+    if (approval.motif !== undefined) payload.motif = approval.motif;
     
-    return this.http.put<Approval>(`${this.apiUrl}/${id}`, request);
+    return this.http.put<any>(`${this.apiUrl}/${id}`, payload);
   }
 
-  deleteApproval(id: number): Observable<void> {
-    return this.http.delete<void>(`${this.apiUrl}/${id}`);
+  deleteApproval(id: number): Observable<any> {
+    return this.http.delete<any>(`${this.apiUrl}/${id}`);
   }
 
-  approveTask(idTache: number, idEmploye: number, commentaire?: string): Observable<Approval> {
-    const request = {
-      idTache: idTache,
-      idEmploye: idEmploye,
-      statut: 'APPROUVE',  // Send enum value as string
-      commentaire: commentaire || null,
-      dateApprobation: new Date().toISOString()
-    };
-    return this.http.post<Approval>(this.apiUrl, request);
+  // Helper method: Approve a market
+  approveMarket(idMarche: number, idEmploye: number, motif?: string): Observable<any> {
+    return this.createApproval({
+      id_marche: idMarche,
+      id_employe: idEmploye,
+      statut: 'Approuvé',  // Backend normalizes this
+      motif: motif
+    });
   }
 
-  rejectTask(idTache: number, idEmploye: number, commentaire: string): Observable<Approval> {
-    const request = {
-      idTache: idTache,
-      idEmploye: idEmploye,
-      statut: 'REJETE',  // Send enum value as string
-      commentaire: commentaire,
-      dateApprobation: new Date().toISOString()
-    };
-    return this.http.post<Approval>(this.apiUrl, request);
+  // Helper method: Reject a market
+  rejectMarket(idMarche: number, idEmploye: number, motif: string): Observable<any> {
+    return this.createApproval({
+      id_marche: idMarche,
+      id_employe: idEmploye,
+      statut: 'Refusé',  // Backend normalizes this
+      motif: motif
+    });
   }
 }

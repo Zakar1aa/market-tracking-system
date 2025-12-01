@@ -6,7 +6,10 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatChipsModule } from '@angular/material/chips';
 import { MatTabsModule } from '@angular/material/tabs';
+import { MatDialog, MatDialogModule } from '@angular/material/dialog';
+import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { Market } from '../../../core/models/market.model';
+import { ApprovalDialogComponent } from '../../tasks/approval-dialog/approval-dialog.component';
 
 @Component({
   selector: 'app-market-detail',
@@ -17,7 +20,9 @@ import { Market } from '../../../core/models/market.model';
     MatButtonModule,
     MatIconModule,
     MatChipsModule,
-    MatTabsModule
+    MatTabsModule,
+    MatDialogModule,
+    MatSnackBarModule
   ],
   templateUrl: './market-detail.component.html',
   styleUrls: ['./market-detail.component.scss']
@@ -79,7 +84,9 @@ export class MarketDetailComponent implements OnInit {
 
   constructor(
     private route: ActivatedRoute,
-    private router: Router
+    private router: Router,
+    private dialog: MatDialog,
+    private snackBar: MatSnackBar
   ) {}
 
   ngOnInit(): void {
@@ -95,6 +102,35 @@ export class MarketDetailComponent implements OnInit {
     if (this.market) {
       this.router.navigate(['/markets/edit', this.market.id_marche]);
     }
+  }
+
+  openApprovalDialog(): void {
+    if (!this.market) return;
+
+    const dialogRef = this.dialog.open(ApprovalDialogComponent, {
+      width: '600px',
+      data: { 
+        marketId: this.market.id_marche,
+        marketTitle: this.market.intitule
+      }
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      if (result?.success) {
+        const message = result.statut === 'Approuvé' 
+          ? 'Marché approuvé avec succès' 
+          : 'Marché refusé';
+        this.snackBar.open(message, 'Fermer', {
+          duration: 3000
+        });
+        // Optionally reload market data here
+      }
+    });
+  }
+
+  canApprove(): boolean {
+    // Allow approval if market is "En Cours"
+    return this.market?.statut === 'En Cours';
   }
 
   getStatusColor(status: string): string {

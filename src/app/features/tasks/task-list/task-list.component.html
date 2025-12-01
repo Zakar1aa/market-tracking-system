@@ -77,39 +77,31 @@
         </ng-container>
 
         <!-- Actions Column -->
-<ng-container matColumnDef="actions">
-  <th mat-header-cell *matHeaderCellDef>Actions</th>
-  <td mat-cell *matCellDef="let task">
-    <div class="action-buttons">
-      <!-- Comments Button -->
-      <button 
-        mat-icon-button 
-        color="primary"
-        (click)="openCommentsDialog(task)" 
-        matTooltip="Commentaires">
-        <mat-icon>comment</mat-icon>
-      </button>
-      
-      @if (canApprove(task)) {
-        <button 
-          mat-icon-button 
-          color="accent"
-          (click)="openApprovalDialog(task)" 
-          matTooltip="Approuver/Rejeter">
-          <mat-icon>fact_check</mat-icon>
-        </button>
-      }
-      
-      <button mat-icon-button (click)="openEditDialog(task)" matTooltip="Modifier">
-        <mat-icon>edit</mat-icon>
-      </button>
-      
-      <button mat-icon-button color="warn" (click)="deleteTask(task)" matTooltip="Supprimer">
-        <mat-icon>delete</mat-icon>
-      </button>
-    </div>
-  </td>
-</ng-container>
+        <ng-container matColumnDef="actions">
+          <th mat-header-cell *matHeaderCellDef>Actions</th>
+          <td mat-cell *matCellDef="let task">
+            <div class="action-buttons">
+              <!-- Comments Button -->
+              <button 
+                mat-icon-button 
+                color="primary"
+                (click)="openCommentsDialog(task)" 
+                matTooltip="Commentaires">
+                <mat-icon>comment</mat-icon>
+              </button>
+              
+              <!-- Removed Approval Button - Approvals are for Markets, not Tasks -->
+              
+              <button mat-icon-button (click)="openEditDialog(task)" matTooltip="Modifier">
+                <mat-icon>edit</mat-icon>
+              </button>
+              
+              <button mat-icon-button color="warn" (click)="deleteTask(task)" matTooltip="Supprimer">
+                <mat-icon>delete</mat-icon>
+              </button>
+            </div>
+          </td>
+        </ng-container>
 
         <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
         <tr mat-row *matRowDef="let row; columns: displayedColumns;" 

@@ -1,65 +1,93 @@
-﻿<div class="market-detail-container">
-  @if (market) {
-    <mat-card class="market-card">
-      <mat-card-header>
-        <div class="header-content">
-          <h1>{{ market.intitule }}</h1>
-          <div class="actions">
-            <button mat-icon-button (click)="editMarket()" matTooltip="Edit Market">
-              <mat-icon>edit</mat-icon>
-            </button>
-            <button mat-icon-button (click)="goBack()" matTooltip="Back to List">
-              <mat-icon>arrow_back</mat-icon>
-            </button>
-          </div>
+﻿<div class="market-detail-container" *ngIf="market">
+  <div class="header">
+    <button mat-icon-button (click)="goBack()">
+      <mat-icon>arrow_back</mat-icon>
+    </button>
+    <h1>{{ market.intitule }}</h1>
+    <div class="actions">
+      <button mat-raised-button color="primary" (click)="editMarket()">
+        <mat-icon>edit</mat-icon>
+        Modifier
+      </button>
+      
+      <!-- Approval Button -->
+      <button 
+        *ngIf="canApprove()" 
+        mat-raised-button 
+        color="accent"
+        (click)="openApprovalDialog()">
+        <mat-icon>fact_check</mat-icon>
+        Approuver/Rejeter
+      </button>
+    </div>
+  </div>
+
+  <mat-card>
+    <mat-card-content>
+      <div class="market-info">
+        <div class="info-row">
+          <span class="label">Statut:</span>
+          <mat-chip [color]="getStatusColor(market.statut)">
+            {{ market.statut }}
+          </mat-chip>
         </div>
-      </mat-card-header>
 
-      <mat-card-content>
-        <div class="details-grid">
-          <div class="detail-item">
-            <span class="label">Nom:</span>
-            <span class="value">{{ market.intitule }}</span>
-          </div>
-
-          <div class="detail-item">
-            <span class="label">Objectif:</span>
-            <span class="value">{{ market.objectif }}</span>
-          </div>
-
-          <div class="detail-item">
-            <span class="label">Statut:</span>
-            <mat-chip [color]="getStatusColor(market.statut)">
-              {{ market.statut }}
-            </mat-chip>
-          </div>
-
-          <div class="detail-item">
-            <span class="label">Date de création:</span>
-            <span class="value">{{ market.created_at | date:'full' }}</span>
-          </div>
-
-          <div class="detail-item">
-            <span class="label">Date de début:</span>
-            <span class="value">{{ market.date_debut | date:'short' }}</span>
-          </div>
-
-          <div class="detail-item">
-            <span class="label">Date de fin:</span>
-            <span class="value">{{ market.date_fin | date:'short' }}</span>
-          </div>
+        <div class="info-row">
+          <span class="label">Objectif:</span>
+          <span class="value">{{ market.objectif }}</span>
         </div>
-      </mat-card-content>
-    </mat-card>
-  } @else {
-    <mat-card>
-      <mat-card-content>
-        <p>Market not found</p>
-        <button mat-button (click)="goBack()">
-          <mat-icon>arrow_back</mat-icon>
-          Back to List
-        </button>
-      </mat-card-content>
-    </mat-card>
-  }
+
+        <div class="info-row">
+          <span class="label">Date de début:</span>
+          <span class="value">{{ market.date_debut | date:'dd/MM/yyyy' }}</span>
+        </div>
+
+        <div class="info-row">
+          <span class="label">Date de fin:</span>
+          <span class="value">{{ market.date_fin | date:'dd/MM/yyyy' }}</span>
+        </div>
+
+        <div class="info-row" *ngIf="market.budget_estime">
+          <span class="label">Budget estimé:</span>
+          <span class="value">{{ market.budget_estime | currency:'MAD':'symbol':'1.2-2' }}</span>
+        </div>
+
+        <div class="info-row" *ngIf="market.created_at">
+          <span class="label">Créé le:</span>
+          <span class="value">{{ market.created_at | date:'dd/MM/yyyy HH:mm' }}</span>
+        </div>
+      </div>
+    </mat-card-content>
+  </mat-card>
+
+  <mat-tab-group>
+    <mat-tab label="Tâches">
+      <div class="tab-content">
+        <p>Liste des tâches liées à ce marché</p>
+        <!-- Add task list here -->
+      </div>
+    </mat-tab>
+
+    <mat-tab label="Documents">
+      <div class="tab-content">
+        <p>Documents liés à ce marché</p>
+        <!-- Add document list here -->
+      </div>
+    </mat-tab>
+
+    <mat-tab label="Approbations">
+      <div class="tab-content">
+        <p>Historique des approbations</p>
+        <!-- Add approval history here -->
+      </div>
+    </mat-tab>
+  </mat-tab-group>
+</div>
+
+<div class="not-found" *ngIf="!market">
+  <mat-icon>error_outline</mat-icon>
+  <h2>Marché introuvable</h2>
+  <button mat-raised-button color="primary" (click)="goBack()">
+    Retour à la liste
+  </button>
 </div>

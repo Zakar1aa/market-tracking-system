@@ -105,7 +105,7 @@ export class CommentDialogComponent implements OnInit {
         priorite: this.commentForm.value.type!
       };
 
-      this.commentService.createComment(newComment).subscribe({
+      this.commentService.addComment(newComment).subscribe({
         next: (comment) => {
           this.comments.unshift(comment);
           this.commentForm.reset({ type: CommentType.INFORMATIF });
