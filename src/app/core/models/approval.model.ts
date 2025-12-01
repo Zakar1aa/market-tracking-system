@@ -1,20 +1,14 @@
 export interface Approval {
   id_approbation?: number;
-  id_tache: number;
+  id_marche: number;        // Changed from id_tache
   id_employe: number;
-  statut: ApprovalStatus;
-  commentaire?: string;
-  date_approbation?: string;
+  statut: string;           // "Approuvé" or "Refusé"
+  motif?: string;           // Changed from commentaire
   created_at?: string;
 }
 
-export enum ApprovalStatus {
-  EN_ATTENTE = 'En attente',
-  APPROUVE = 'Approuvé',
-  REJETE = 'Rejeté'
-}
-
-export interface ApprovalWithEmployee extends Approval {
+export interface ApprovalWithDetails extends Approval {
   employeNom?: string;
   employePrenom?: string;
+  marcheIntitule?: string;
 }

@@ -1,64 +1,69 @@
-<h2 mat-dialog-title>
-  <mat-icon>fact_check</mat-icon>
-  Approbation de la Tâche
-</h2>
+<h2 mat-dialog-title>Approbation du Marché</h2>
 
 <mat-dialog-content>
-  <div class="task-info">
-    <h3>{{ data.task.titre }}</h3>
-    <p class="task-description">{{ data.task.description }}</p>
+  <div class="dialog-content">
+    <p class="market-title">
+      <strong>{{ displayTitle }}</strong>
+    </p>
+
+    <form [formGroup]="approvalForm">
+      <!-- Decision Radio Buttons -->
+      <mat-radio-group formControlName="decision" class="decision-group">
+        <mat-radio-button value="Approuvé" color="primary">
+          <span class="decision-label approve">
+            <mat-icon>check_circle</mat-icon>
+            Approuver
+          </span>
+          <p class="decision-description">La tâche répond aux besoins</p>
+        </mat-radio-button>
+
+        <mat-radio-button value="Refusé" color="warn">
+          <span class="decision-label reject">
+            <mat-icon>cancel</mat-icon>
+            Rejeter
+          </span>
+          <p class="decision-description">La tâche ne répond pas aux besoins</p>
+        </mat-radio-button>
+      </mat-radio-group>
+
+      <!-- Motif Field -->
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Motif {{ approvalForm.get('decision')?.value === 'Refusé' ? '(obligatoire)' : '(optionnel)' }}</mat-label>
+        <textarea 
+          matInput 
+          formControlName="motif"
+          rows="4"
+          placeholder="Expliquez votre décision..."
+          maxlength="1000"></textarea>
+        <mat-hint align="end">{{ approvalForm.get('motif')?.value?.length || 0 }}/1000</mat-hint>
+        <mat-error *ngIf="approvalForm.get('motif')?.hasError('required')">
+          Le motif est obligatoire pour un rejet
+        </mat-error>
+        <mat-error *ngIf="approvalForm.get('motif')?.hasError('maxlength')">
+          Le motif ne doit pas dépasser 1000 caractères
+        </mat-error>
+      </mat-form-field>
+    </form>
+
+    <div class="warning-message" *ngIf="!currentUserId">
+      <mat-icon>warning</mat-icon>
+      <p>Impossible d'identifier l'utilisateur actuel. Veuillez vous reconnecter.</p>
+    </div>
   </div>
-
-  <form [formGroup]="approvalForm" class="approval-form">
-    <mat-radio-group formControlName="decision" (change)="onDecisionChange()">
-      <mat-radio-button [value]="ApprovalStatus.APPROUVE" class="approval-option approve">
-        <div class="option-content">
-          <mat-icon>check_circle</mat-icon>
-          <div>
-            <strong>Approuver</strong>
-            <p>La tâche répond aux besoins</p>
-          </div>
-        </div>
-      </mat-radio-button>
-
-      <mat-radio-button [value]="ApprovalStatus.REJETE" class="approval-option reject">
-        <div class="option-content">
-          <mat-icon>cancel</mat-icon>
-          <div>
-            <strong>Rejeter</strong>
-            <p>La tâche ne répond pas aux besoins</p>
-          </div>
-        </div>
-      </mat-radio-button>
-    </mat-radio-group>
-
-    <mat-form-field appearance="outline" class="full-width">
-      <mat-label>Commentaire</mat-label>
-      <textarea 
-        matInput 
-        formControlName="commentaire" 
-        rows="4"
-        [placeholder]="approvalForm.get('decision')?.value === ApprovalStatus.REJETE ? 'Expliquez pourquoi (obligatoire)' : 'Ajoutez un commentaire (optionnel)'">
-      </textarea>
-      @if (approvalForm.get('commentaire')?.hasError('required')) {
-        <mat-error>Un commentaire est obligatoire pour le rejet</mat-error>
-      }
-    </mat-form-field>
-  </form>
 </mat-dialog-content>
 
 <mat-dialog-actions align="end">
-  <button mat-button (click)="onCancel()" [disabled]="isSaving">
+  <button mat-button (click)="onCancel()" [disabled]="isSubmitting">
     Annuler
   </button>
   <button 
     mat-raised-button 
-    [color]="approvalForm.get('decision')?.value === ApprovalStatus.APPROUVE ? 'primary' : 'warn'"
-    (click)="onSubmit()" 
-    [disabled]="!approvalForm.valid || isSaving">
-    @if (isSaving) {
-      <mat-spinner diameter="20" style="display: inline-block; margin-right: 8px;"></mat-spinner>
-    }
-    {{ approvalForm.get('decision')?.value === ApprovalStatus.APPROUVE ? 'Approuver' : 'Rejeter' }}
+    [color]="approvalForm.get('decision')?.value === 'Approuvé' ? 'primary' : 'warn'"
+    (click)="onSubmit()"
+    [disabled]="approvalForm.invalid || isSubmitting || !currentUserId">
+    <mat-spinner diameter="20" *ngIf="isSubmitting"></mat-spinner>
+    <span *ngIf="!isSubmitting">
+      {{ approvalForm.get('decision')?.value === 'Approuvé' ? 'Approuver' : 'Rejeter' }}
+    </span>
   </button>
 </mat-dialog-actions>

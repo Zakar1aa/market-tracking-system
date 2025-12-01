@@ -14,7 +14,6 @@ import { MatBadgeModule } from '@angular/material/badge';
 import { Task } from '../../../core/models/task.model';
 import { TaskService } from '../../../core/services/task.service';
 import { TaskFormComponent } from '../task-form/task-form.component';
-import { ApprovalDialogComponent } from '../approval-dialog/approval-dialog.component';
 import { CommentDialogComponent } from '../comment-dialog/comment-dialog.component';
 
 @Component({
@@ -109,28 +108,6 @@ export class TaskListComponent implements OnInit {
     });
   }
 
-  openApprovalDialog(task: Task): void {
-    const dialogRef = this.dialog.open(ApprovalDialogComponent, {
-      width: '600px',
-      data: { 
-        taskId: task.id_tache,
-        taskTitle: task.titre
-      }
-    });
-
-    dialogRef.afterClosed().subscribe(result => {
-      if (result) {
-        this.loadTasks();
-        const message = result.statut === 'Approuvé' 
-          ? 'Tâche approuvée avec succès' 
-          : 'Tâche rejetée';
-        this.snackBar.open(message, 'Fermer', {
-          duration: 3000
-        });
-      }
-    });
-  }
-
   deleteTask(task: Task): void {
     if (confirm(`Êtes-vous sûr de vouloir supprimer la tâche "${task.titre}" ?`)) {
       this.taskService.deleteTask(task.id_tache!).subscribe({
@@ -174,9 +151,5 @@ export class TaskListComponent implements OnInit {
     const today = new Date();
     const dueDate = new Date(task.date_fin);
     return dueDate < today;
-  }
-
-  canApprove(task: Task): boolean {
-    return task.etat === 'En cours';
   }
 }
