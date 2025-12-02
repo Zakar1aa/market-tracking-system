@@ -58,6 +58,11 @@ export class MarketFormComponent implements OnInit {
     this.isEditMode = !!data?.market;
     this.existingFilePath = data?.market?.fichier_cps_path || '';
     
+    // Extraction sécurisée des IDs pour le mode édition (car le backend renvoie des objets imbriqués)
+    const serviceId = data?.market?.service?.id_service || null;
+    // Si created_by est un objet, on prend son ID, sinon null
+    const creatorId = data?.market?.created_by?.id_employe || null;
+
     this.marketForm = this.fb.group({
       intitule: [data?.market?.intitule || '', [Validators.required, Validators.minLength(3)]],
       objectif: [data?.market?.objectif || '', [Validators.required]],
@@ -65,8 +70,8 @@ export class MarketFormComponent implements OnInit {
       date_debut: [data?.market?.date_debut || '', Validators.required],
       date_fin: [data?.market?.date_fin || '', Validators.required],
       budget_estime: [data?.market?.budget_estime || null],
-      id_service: [data?.market?.id_service || null, Validators.required],
-      id_created_by: [data?.market?.id_created_by || null],
+      id_service: [serviceId, Validators.required], // ID du service
+      id_created_by: [creatorId],                   // ID du créateur
       fichier_cps_path: [data?.market?.fichier_cps_path || '']
     });
   }
@@ -95,14 +100,12 @@ export class MarketFormComponent implements OnInit {
   onFileSelected(event: any): void {
     const file = event.target.files[0];
     if (file) {
-      // Validate file type (PDF only)
       if (file.type !== 'application/pdf') {
         alert('Veuillez sélectionner un fichier PDF uniquement');
         event.target.value = '';
         return;
       }
       
-      // Validate file size (max 10MB)
       const maxSize = 10 * 1024 * 1024; // 10MB
       if (file.size > maxSize) {
         alert('Le fichier ne doit pas dépasser 10 MB');
@@ -136,37 +139,49 @@ export class MarketFormComponent implements OnInit {
       this.isSaving = true;
       const formValue = this.marketForm.value;
       
-      // If file is selected, handle upload
+      // Gestion du fichier (chemin simulé)
+      let finalFilePath = formValue.fichier_cps_path;
       if (this.selectedFile) {
-        // For now, we'll just store the filename
-        // In production, you'd upload to server and get back the path
-        formValue.fichier_cps_path = `/uploads/cps/${Date.now()}_${this.selectedFile.name}`;
-        
-        // TODO: Implement actual file upload to backend
-        // const formData = new FormData();
-        // formData.append('file', this.selectedFile);
-        // this.marketService.uploadCPSFile(formData).subscribe(...)
+        finalFilePath = `/uploads/cps/${Date.now()}_${this.selectedFile.name}`;
       }
       
+      // 💡 TRANSFORMATION CRUCIALE : Mapping des champs pour le Backend Java
+      // Les clés à gauche doivent correspondre EXACTEMENT aux clés attendues par request.get("key") dans le contrôleur Java
+      const payload = {
+        intitule: formValue.intitule,
+        objectif: formValue.objectif,
+        budgetEstime: formValue.budget_estime, // Java attend: budgetEstime
+        dateDebut: formValue.date_debut,       // Java attend: dateDebut
+        dateFin: formValue.date_fin,           // Java attend: dateFin
+        statut: formValue.statut,
+        idService: formValue.id_service,       // Java attend: idService
+        idCreatedBy: formValue.id_created_by,  // Java attend: idCreatedBy
+        fichierCpsPath: finalFilePath || 'default.pdf' // Java attend: fichierCpsPath
+      };
+
+      console.log('Envoi au Backend:', payload); // Vérifiez la console pour voir ces clés
+
       if (this.isEditMode && this.data.market?.id_marche) {
-        // Update existing market
-        this.marketService.updateMarket(this.data.market.id_marche, formValue).subscribe({
+        this.marketService.updateMarket(this.data.market.id_marche, payload).subscribe({
           next: (response) => {
-            this.dialogRef.close({ ...formValue, id_marche: this.data.market!.id_marche });
+            this.dialogRef.close(response);
           },
           error: (error) => {
             console.error('Error updating market:', error);
+            const msg = error.error?.message || error.message;
+            alert("Erreur mise à jour : " + msg);
             this.isSaving = false;
           }
         });
       } else {
-        // Create new market
-        this.marketService.createMarket(formValue).subscribe({
+        this.marketService.createMarket(payload).subscribe({
           next: (response) => {
             this.dialogRef.close(response);
           },
           error: (error) => {
             console.error('Error creating market:', error);
+            const msg = error.error?.message || error.message;
+            alert("Erreur création : " + msg);
             this.isSaving = false;
           }
         });

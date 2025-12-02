@@ -1,20 +1,37 @@
+// zakar1aa/market-tracking-system/market-tracking-system-5354c2cbdab2dc5b0418bd06b8f05eda69847886/src/app/features/auth/login/login.component.scss
 .login-container {
   min-height: 100vh;
   display: flex;
   align-items: center;
   justify-content: center;
   padding: 20px;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  // Dégradé de fond plus doux et moderne
+  background: linear-gradient(135deg, #e8f0ff 0%, #d8e0f9 100%); 
 }
 
 .login-card {
   width: 100%;
   max-width: 400px;
-  padding: 20px;
+  padding: 32px; /* Marge intérieure augmentée */
+  border-radius: 16px !important; /* Coins arrondis plus prononcés */
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1); /* Ombre portée élevée */
+  background: white;
 
   mat-card-header {
     text-align: center;
     margin-bottom: 24px;
+    padding: 0; // Réinitialise le padding de l'en-tête Material
+
+    .mat-mdc-card-title {
+      font-size: 28px;
+      font-weight: 600;
+      color: #333;
+      margin-bottom: 8px;
+    }
+    
+    .mat-mdc-card-subtitle {
+      color: #666;
+    }
   }
 
   form {
@@ -30,7 +47,9 @@
   button[type="submit"] {
     height: 48px;
     font-size: 16px;
+    font-weight: 600;
     margin-top: 8px;
+    border-radius: 8px !important; 
   }
 }
 
@@ -39,10 +58,15 @@
   align-items: center;
   gap: 8px;
   padding: 12px;
-  background: #ffebee;
+  background: #fef2f2; /* Fond d'erreur très clair */
+  border-left: 4px solid #ef4444; /* Bordure d'accentuation */
   border-radius: 4px;
-  color: #c62828;
+  color: #b91c1c;
   margin-bottom: 16px;
+
+  mat-icon {
+    color: #ef4444;
+  }
 }
 
 .register-link {

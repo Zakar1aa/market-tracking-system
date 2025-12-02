@@ -1,25 +1,49 @@
+// zakar1aa/market-tracking-system/market-tracking-system-5354c2cbdab2dc5b0418bd06b8f05eda69847886/src/app/shared/components/sidebar/sidebar.component.scss
 .sidebar {
   width: 250px;
   background: #fff;
-  border-right: 1px solid #e0e0e0;
+  border-right: 1px solid #e9ecef; /* Bordure plus douce */
   transition: width 0.3s ease;
-  overflow: hidden;
+  overflow-x: hidden;
+  flex-shrink: 0;
+  position: sticky;
+  top: 64px; /* Décalage sous la navbar */
+  height: calc(100vh - 64px);
+  padding: 8px 0;
+  box-shadow: 2px 0 4px rgba(0,0,0,0.02);
   
   &.sidebar-collapsed {
     width: 0;
+    padding: 0;
   }
   
   mat-nav-list {
-    padding-top: 8px;
+    padding-top: 0;
   }
   
   a {
-    margin: 4px 8px;
-    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin: 4px 12px;
+    padding: 12px 16px;
+    height: auto;
+    border-radius: 8px; 
+    text-decoration: none;
+    color: #333;
+    transition: background-color 0.2s, color 0.2s;
+    
+    mat-icon {
+      color: #6c757d; 
+    }
+    
+    span {
+      font-weight: 500;
+    }
     
     &.active {
-      background-color: #e8eaf6;
-      color: #3f51b5;
+      background-color: #e8eaf6; // Couleur d'arrière-plan Material
+      color: #3f51b5; // Couleur principale Material
       
       mat-icon {
         color: #3f51b5;
@@ -27,7 +51,7 @@
     }
     
     &:hover:not(.active) {
-      background-color: #f5f5f5;
+      background-color: #f1f3f5;
     }
   }
 }

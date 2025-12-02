@@ -6,6 +6,8 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatDividerModule } from '@angular/material/divider';
 import { AuthService } from '../../../core/services/auth.service';
+import { Observable } from 'rxjs';
+import { User } from '../../../core/models/user.model';
 
 @Component({
   selector: 'app-navbar',
@@ -16,22 +18,22 @@ import { AuthService } from '../../../core/services/auth.service';
     MatButtonModule,
     MatIconModule,
     MatMenuModule,
-    MatDividerModule  // Added this!
+    MatDividerModule  
   ],
   templateUrl: './navbar.component.html',
   styleUrls: ['./navbar.component.scss']
 })
-export class NavbarComponent {
+export class NavbarComponent { // 👈 CORRECTION: Retiré 'implements OnInit'
   @Output() toggleSidebar = new EventEmitter<void>();
 
-  authService = inject(AuthService);  // Changed this line
-  currentUser$ = this.authService.currentUser$;
+  private authService = inject(AuthService); // AuthService est déjà injecté
+  currentUser$: Observable<User | null> = this.authService.currentUser$;
 
   onToggleSidebar(): void {
     this.toggleSidebar.emit();
   }
 
-  logout(): void {
-    this.authService.logout();
+  onLogout(): void {
+    this.authService.logout(); // Appelle la méthode de déconnexion (qui redirige vers /login)
   }
 }

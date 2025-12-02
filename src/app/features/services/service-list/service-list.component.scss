@@ -1,5 +1,8 @@
+// zakar1aa/market-tracking-system/market-tracking-system-5354c2cbdab2dc5b0418bd06b8f05eda69847886/src/app/features/services/service-list/service-list.component.scss
 .service-list-container {
   padding: 2rem;
+  max-width: 1400px;
+  margin: 0 auto;
 
   .header {
     display: flex;
@@ -63,6 +66,19 @@
 .services-table {
   width: 100%;
 
+  // Modern table styling
+  .mat-header-cell {
+    font-weight: 600;
+    color: #333;
+    background: #f5f7fa;
+    border-bottom: 2px solid #e0e0e0;
+  }
+
+  .mat-cell {
+    padding: 16px 8px;
+    border-bottom: 1px solid #f0f0f0;
+  }
+
   .service-name {
     display: flex;
     align-items: center;
@@ -81,7 +97,7 @@
     transition: background-color 0.2s;
 
     &:hover {
-      background-color: #f5f5f5;
+      background-color: #f0f3f7;
     }
   }
 }

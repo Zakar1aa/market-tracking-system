@@ -12,54 +12,43 @@
         <mat-form-field appearance="outline">
           <mat-label>Nom *</mat-label>
           <input matInput formControlName="nom" placeholder="Nom de famille">
-          @if (employeeForm.get("nom")?.hasError("required")) {
-            <mat-error>Le nom est requis</mat-error>
-          }
-          @if (employeeForm.get("nom")?.hasError("minlength")) {
-            <mat-error>Le nom doit contenir au moins 2 caractères</mat-error>
-          }
+          <mat-error *ngIf="employeeForm.get('nom')?.hasError('required')">Requis</mat-error>
         </mat-form-field>
 
         <mat-form-field appearance="outline">
           <mat-label>Prénom *</mat-label>
           <input matInput formControlName="prenom" placeholder="Prénom">
-          @if (employeeForm.get("prenom")?.hasError("required")) {
-            <mat-error>Le prénom est requis</mat-error>
-          }
-          @if (employeeForm.get("prenom")?.hasError("minlength")) {
-            <mat-error>Le prénom doit contenir au moins 2 caractères</mat-error>
-          }
+          <mat-error *ngIf="employeeForm.get('prenom')?.hasError('required')">Requis</mat-error>
         </mat-form-field>
       </div>
 
       <mat-form-field appearance="outline" class="full-width">
-        <mat-label>Email</mat-label>
+        <mat-label>Email *</mat-label>
         <input matInput type="email" formControlName="email" placeholder="email@example.com">
-        @if (employeeForm.get("email")?.hasError("email")) {
-          <mat-error>Email invalide</mat-error>
-        }
+        <mat-error *ngIf="employeeForm.get('email')?.hasError('email')">Email invalide</mat-error>
+        <mat-error *ngIf="employeeForm.get('email')?.hasError('required')">Requis</mat-error>
       </mat-form-field>
 
       <mat-form-field appearance="outline" class="full-width">
-        <mat-label>Téléphone</mat-label>
-        <input matInput formControlName="telephone" placeholder="+212 6 XX XX XX XX">
+        <mat-label>Rôle *</mat-label>
+        <mat-select formControlName="role">
+          <mat-option *ngFor="let role of roles" [value]="role">
+            {{ role }}
+          </mat-option>
+        </mat-select>
+        <mat-error *ngIf="employeeForm.get('role')?.hasError('required')">Requis</mat-error>
       </mat-form-field>
 
       <mat-form-field appearance="outline" class="full-width">
-        <mat-label>Poste</mat-label>
-        <input matInput formControlName="poste" placeholder="Ex: Développeur, Chef de projet">
-      </mat-form-field>
-
-      <mat-form-field appearance="outline" class="full-width">
-        <mat-label>Service</mat-label>
+        <mat-label>Service *</mat-label>
         <mat-select formControlName="id_service" placeholder="Sélectionner un service">
-          <mat-option [value]="null">Aucun</mat-option>
           @for (service of services; track service.id_service) {
             <mat-option [value]="service.id_service">
               {{ service.nom }}
             </mat-option>
           }
         </mat-select>
+        <mat-error *ngIf="employeeForm.get('id_service')?.hasError('required')">Le service est obligatoire</mat-error>
       </mat-form-field>
     </form>
   }

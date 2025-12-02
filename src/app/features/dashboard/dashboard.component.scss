@@ -1,3 +1,4 @@
+// zakar1aa/market-tracking-system/market-tracking-system-5354c2cbdab2dc5b0418bd06b8f05eda69847886/src/app/features/dashboard/dashboard.component.scss
 .dashboard-container {
   padding: 24px;
   max-width: 1400px;
@@ -30,6 +31,13 @@
 }
 
 .stat-card {
+  transition: transform 0.3s ease, box-shadow 0.3s ease; /* Ajouté pour l'effet moderne */
+  
+  &:hover {
+    transform: translateY(-5px); 
+    box-shadow: 0 10px 15px rgba(0, 0, 0, 0.15); /* Ombre plus marquée au survol */
+  }
+
   mat-card-content {
     padding: 0 !important;
   }
@@ -48,6 +56,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2); /* Ombre sur l'icône */
 
     mat-icon {
       font-size: 32px;
@@ -56,20 +65,21 @@
       color: white;
     }
 
+    /* Dégradés adoucis */
     &.markets {
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      background: linear-gradient(135deg, #4c68d7 0%, #3a51ad 100%); 
     }
 
     &.projects {
-      background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+      background: linear-gradient(135deg, #ff8c94 0%, #fa628c 100%); 
     }
 
     &.pending {
-      background: linear-gradient(135deg, #ffa751 0%, #ffe259 100%);
+      background: linear-gradient(135deg, #ffc371 0%, #ff5e3a 100%); 
     }
 
     &.completed {
-      background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+      background: linear-gradient(135deg, #1ddf88 0%, #30c88c 100%); 
     }
   }
 
@@ -99,7 +109,9 @@
 }
 
 .content-card {
+  // Ajustement du padding pour la cohérence
   mat-card-header {
+    padding: 16px 24px 0 24px; 
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -111,24 +123,30 @@
       margin: 0;
     }
   }
+  
+  mat-card-content {
+    padding: 16px 24px 24px 24px !important; 
+  }
 }
 
-// Projects List
-.projects-list {
+// Listes de Projets/Tâches
+.projects-list, .tasks-list {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 8px;
 }
 
-.project-item {
-  padding: 16px;
+.project-item, .task-item {
+  padding: 12px;
   border: 1px solid #e0e0e0;
   border-radius: 8px;
   transition: all 0.3s ease;
+  background-color: #ffffff;
 
   &:hover {
-    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
     border-color: #3f51b5;
+    transform: translateY(-2px);
   }
 
   .project-info {

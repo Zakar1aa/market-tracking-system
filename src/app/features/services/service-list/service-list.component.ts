@@ -30,7 +30,7 @@ import { ServiceFormComponent } from '../service-form/service-form.component';
   styleUrls: ['./service-list.component.scss']
 })
 export class ServiceListComponent implements OnInit {
-  displayedColumns: string[] = ['nom', 'description', 'created_at', 'actions'];
+  displayedColumns: string[] = ['nom', 'description', 'actions'];
   services: Service[] = [];
   isLoading = true;
 
@@ -94,19 +94,42 @@ export class ServiceListComponent implements OnInit {
   }
 
   deleteService(service: Service): void {
+    // 1. Vérification de sécurité : L'ID est-il valide ?
+    if (!service.id_service) {
+        console.error("Erreur critique : Tentative de suppression d'un service sans ID", service);
+        this.snackBar.open("Impossible de supprimer : ID manquant", "Fermer");
+        return;
+    }
+
     if (confirm(`Êtes-vous sûr de vouloir supprimer le service "${service.nom}" ?`)) {
-      this.serviceService.deleteService(service.id_service!).subscribe({
+      console.log('Envoi requête DELETE pour ID:', service.id_service); // DEBUG
+
+      this.serviceService.deleteService(service.id_service).subscribe({
         next: () => {
-          this.loadServices();
+          console.log('Succès DELETE (Le serveur a répondu 200 OK)'); // DEBUG
+          
+          // Mise à jour visuelle immédiate
+          this.services = this.services.filter(s => s.id_service !== service.id_service);
+          
           this.snackBar.open('Service supprimé avec succès', 'Fermer', {
             duration: 3000
           });
         },
         error: (error) => {
-          console.error('Error deleting service:', error);
-          this.snackBar.open('Erreur lors de la suppression', 'Fermer', {
-            duration: 3000
+          console.error('Erreur API DELETE:', error); // DEBUG
+          
+          // Message d'erreur spécifique si c'est un problème de contrainte (souvent 409 ou 500)
+          let message = 'Erreur lors de la suppression';
+          if (error.status === 409 || error.status === 500) {
+             message = 'Impossible de supprimer : Ce service contient probablement des employés ou des marchés.';
+          }
+          
+          this.snackBar.open(message, 'Fermer', {
+            duration: 5000
           });
+          
+          // On recharge la liste pour être sûr que l'affichage correspond à la base de données
+          this.loadServices();
         }
       });
     }

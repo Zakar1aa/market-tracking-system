@@ -1,8 +1,22 @@
+// zakar1aa/market-tracking-system/market-tracking-system-5354c2cbdab2dc5b0418bd06b8f05eda69847886/src/app/shared/components/navbar/navbar.component.scss
 .navbar {
   position: sticky;
   top: 0;
   z-index: 1000;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1); 
+  height: 64px;
+}
+
+.navbar-content {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  padding: 0 16px;
+}
+
+.menu-button {
+  margin-right: 16px;
+  color: blue; 
 }
 
 .app-title {
@@ -15,18 +29,56 @@
   flex: 1;
 }
 
-.user-info {
-  padding: 16px;
+.user-menu {
+  // Styles for the container of the user button
+}
+
+.user-button {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 12px; 
+  height: 48px;
+  border-radius: 8px;
   
-  .user-name {
+  /* Force le blanc sur l'élément bouton et icônes */
+  color: #4b2bbe !important; 
+  min-width: 0;
+  
+  mat-icon {
+    font-size: 24px;
+    width: 24px;
+    height: 24px;
+    color: #2b1eda !important; 
+  }
+}
+
+.user-info {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  padding-right: 8px; 
+  
+  /* Force le blanc sur l'ensemble du conteneur d'informations */
+  color: #4012e6 !important;
+  
+  p {
     margin: 0;
-    font-weight: 500;
-    font-size: 14px;
+    line-height: 1.2;
   }
   
-  .user-email {
-    margin: 4px 0 0 0;
-    font-size: 12px;
-    color: #666;
+  .user-name {
+    /* Nom: Blanc pur, très gras, grande taille pour l'impact visuel */
+    font-weight: 700; 
+    font-size: 16px; 
+    color: #1215d3 !important; /* BLANC PUR FORCÉ */
+  }
+  
+  .user-role {
+    /* Rôle: Blanc pur pour la lisibilité, différencié par taille/poids */
+    font-size: 13px; 
+    font-weight: 500; 
+    color: #c90f0f !important; /* BLANC PUR FORCÉ */
+    opacity: 0.9;
   }
 }

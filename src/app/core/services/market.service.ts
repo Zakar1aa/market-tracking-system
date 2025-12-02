@@ -20,35 +20,14 @@ export class MarketService {
     return this.http.get<Market>(`${this.apiUrl}/${id}`);
   }
 
-  createMarket(market: Market): Observable<any> {
-    const request = {
-      intitule: market.intitule,
-      objectif: market.objectif,
-      budgetEstime: market.budget_estime,
-      dateDebut: market.date_debut,
-      dateFin: market.date_fin,
-      statut: market.statut,
-      idService: market.id_service,
-      fichierCpsPath: market.fichier_cps_path,
-      idCreatedBy: market.id_created_by
-    };
-    
-    return this.http.post(this.apiUrl, request);
+  // MODIFICATION: Accepte 'any' pour envoyer le payload tel quel
+  createMarket(marketPayload: any): Observable<any> {
+    return this.http.post(this.apiUrl, marketPayload);
   }
 
-  updateMarket(id: number, market: Partial<Market>): Observable<any> {
-    const request: any = {};
-    
-    if (market.intitule) request.intitule = market.intitule;
-    if (market.objectif) request.objectif = market.objectif;
-    if (market.budget_estime !== undefined) request.budgetEstime = market.budget_estime;
-    if (market.date_debut) request.dateDebut = market.date_debut;
-    if (market.date_fin) request.dateFin = market.date_fin;
-    if (market.statut) request.statut = market.statut;
-    if (market.id_service) request.idService = market.id_service;
-    if (market.fichier_cps_path) request.fichierCpsPath = market.fichier_cps_path;
-    
-    return this.http.put(`${this.apiUrl}/${id}`, request);
+  // MODIFICATION: Accepte 'any'
+  updateMarket(id: number, marketPayload: any): Observable<any> {
+    return this.http.put(`${this.apiUrl}/${id}`, marketPayload);
   }
 
   deleteMarket(id: number): Observable<any> {
@@ -57,13 +36,5 @@ export class MarketService {
 
   getMarketsByStatus(status: MarketStatus): Observable<Market[]> {
     return this.http.get<Market[]>(`${this.apiUrl}/statut/${status}`);
-  }
-
-  getActiveMarkets(): Observable<Market[]> {
-    return this.http.get<Market[]>(`${this.apiUrl}/actifs`);
-  }
-
-  getMarketsByService(idService: number): Observable<Market[]> {
-    return this.http.get<Market[]>(`${this.apiUrl}/service/${idService}`);
   }
 }

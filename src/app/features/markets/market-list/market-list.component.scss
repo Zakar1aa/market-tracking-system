@@ -1,3 +1,4 @@
+// zakar1aa/market-tracking-system/market-tracking-system-5354c2cbdab2dc5b0418bd06b8f05eda69847886/src/app/features/markets/market-list/market-list.component.scss
 .market-list-container {
   padding: 24px;
   max-width: 1400px;
@@ -32,15 +33,18 @@
 
 .markets-table {
   width: 100%;
+  // Le coin arrondi est géré par la carte conteneur (mat-card)
 
   th {
     font-weight: 600;
     color: #333;
     background: #f5f7fa;
+    border-bottom: 2px solid #e0e0e0; /* Séparateur plus marqué pour l'en-tête */
   }
 
   td {
     padding: 16px 8px;
+    border-bottom: 1px solid #f0f0f0; /* Séparateur de ligne très léger */
   }
 
   mat-chip {
@@ -53,7 +57,12 @@
     transition: background-color 0.2s;
 
     &:hover {
-      background-color: #f5f7fa;
+      background-color: #f0f3f7; /* Effet de survol adouci */
+    }
+    
+    // Assure que les lignes n'ont pas de bordure non désirée
+    &.mat-row {
+        border: none;
     }
   }
 }

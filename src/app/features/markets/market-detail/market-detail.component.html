@@ -1,4 +1,9 @@
-﻿<div class="market-detail-container" *ngIf="market">
+﻿<div class="loading-container" *ngIf="isLoading">
+  <mat-spinner></mat-spinner>
+  <p>Chargement du marché...</p>
+</div>
+
+<div class="market-detail-container" *ngIf="!isLoading && market">
   <div class="header">
     <button mat-icon-button (click)="goBack()">
       <mat-icon>arrow_back</mat-icon>
@@ -10,7 +15,6 @@
         Modifier
       </button>
       
-      <!-- Approval Button -->
       <button 
         *ngIf="canApprove()" 
         mat-raised-button 
@@ -27,7 +31,7 @@
       <div class="market-info">
         <div class="info-row">
           <span class="label">Statut:</span>
-          <mat-chip [color]="getStatusColor(market.statut)">
+          <mat-chip [color]="getStatusColor(market.statut)" selected>
             {{ market.statut }}
           </mat-chip>
         </div>
@@ -60,31 +64,75 @@
     </mat-card-content>
   </mat-card>
 
-  <mat-tab-group>
-    <mat-tab label="Tâches">
+  <mat-tab-group class="mt-4">
+    <mat-tab label="Tâches ({{tasks.length}})">
       <div class="tab-content">
-        <p>Liste des tâches liées à ce marché</p>
-        <!-- Add task list here -->
+        <div *ngIf="isLoadingTasks" class="loading-small">
+          <mat-spinner diameter="30"></mat-spinner>
+        </div>
+
+        <mat-list *ngIf="!isLoadingTasks && tasks.length > 0">
+          <mat-list-item *ngFor="let task of tasks">
+            <mat-icon matListItemIcon>task</mat-icon>
+            <div matListItemTitle>{{ task.titre }}</div>
+            <div matListItemLine>{{ task.description }}</div>
+            <div matListItemMeta>
+              <mat-chip>{{ task.etat }}</mat-chip>
+            </div>
+          </mat-list-item>
+        </mat-list>
+
+        <p *ngIf="!isLoadingTasks && tasks.length === 0" class="empty-tab">
+          Aucune tâche associée.
+        </p>
       </div>
     </mat-tab>
 
     <mat-tab label="Documents">
       <div class="tab-content">
-        <p>Documents liés à ce marché</p>
-        <!-- Add document list here -->
+        <mat-list>
+          <mat-list-item *ngIf="market.fichier_cps_path">
+            <mat-icon matListItemIcon color="primary">picture_as_pdf</mat-icon>
+            <div matListItemTitle>Cahier des Prescriptions Spéciales (CPS)</div>
+            <div matListItemLine>{{ market.fichier_cps_path }}</div>
+            <button mat-icon-button matListItemMeta (click)="downloadDocument(market.fichier_cps_path!)" matTooltip="Télécharger">
+              <mat-icon>download</mat-icon>
+            </button>
+          </mat-list-item>
+          
+          <p *ngIf="!market.fichier_cps_path" class="empty-tab">
+            Aucun document associé.
+          </p>
+        </mat-list>
       </div>
     </mat-tab>
 
-    <mat-tab label="Approbations">
+    <mat-tab label="Approbations ({{approvals.length}})">
       <div class="tab-content">
-        <p>Historique des approbations</p>
-        <!-- Add approval history here -->
+        <div *ngIf="isLoadingApprovals" class="loading-small">
+          <mat-spinner diameter="30"></mat-spinner>
+        </div>
+
+        <mat-list *ngIf="!isLoadingApprovals && approvals.length > 0">
+          <mat-list-item *ngFor="let app of approvals">
+            <mat-icon matListItemIcon [color]="app.statut === 'Approuvé' ? 'primary' : 'warn'">
+              {{ app.statut === 'Approuvé' ? 'check_circle' : 'cancel' }}
+            </mat-icon>
+            <div matListItemTitle>{{ app.statut }}</div>
+            <div matListItemLine>Par Employé #{{ app.id_employe }} le {{ app.created_at | date:'dd/MM/yyyy' }}</div>
+            <div matListItemLine *ngIf="app.motif">Motif: {{ app.motif }}</div>
+          </mat-list-item>
+        </mat-list>
+
+        <p *ngIf="!isLoadingApprovals && approvals.length === 0" class="empty-tab">
+          Aucune approbation enregistrée.
+        </p>
       </div>
     </mat-tab>
   </mat-tab-group>
 </div>
 
-<div class="not-found" *ngIf="!market">
+<div class="not-found" *ngIf="!isLoading && !market">
   <mat-icon>error_outline</mat-icon>
   <h2>Marché introuvable</h2>
   <button mat-raised-button color="primary" (click)="goBack()">

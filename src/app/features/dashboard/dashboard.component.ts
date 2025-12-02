@@ -8,7 +8,7 @@ import { MatChipsModule } from '@angular/material/chips';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MarketService } from '../../core/services/market.service';
 import { TaskService } from '../../core/services/task.service';
-import { Market } from '../../core/models/market.model';
+import { Market, MarketStatus } from '../../core/models/market.model'; // 👈 Import MarketStatus
 import { Task } from '../../core/models/task.model';
 
 interface DashboardStats {
@@ -64,7 +64,8 @@ export class DashboardComponent implements OnInit {
     this.marketService.getAllMarkets().subscribe({
       next: (markets) => {
         this.stats.totalMarkets = markets.length;
-        this.stats.activeMarkets = markets.filter(m => m.statut === 'En Cours').length;
+        // 👈 CORRECTION : Utilisation de MarketStatus.EN_COURS
+        this.stats.activeMarkets = markets.filter(m => m.statut === MarketStatus.EN_COURS).length;
         this.recentMarkets = markets
           .sort((a, b) => new Date(b.created_at || 0).getTime() - new Date(a.created_at || 0).getTime())
           .slice(0, 4);
@@ -78,6 +79,7 @@ export class DashboardComponent implements OnInit {
   loadTasks(): void {
     this.taskService.getAllTasks().subscribe({
       next: (tasks) => {
+        // Note: Assurez-vous que les états des tâches correspondent aussi à votre modèle Task
         this.stats.pendingTasks = tasks.filter(t => t.etat === 'En attente').length;
         this.stats.completedTasks = tasks.filter(t => t.etat === 'Validée').length;
         
@@ -96,14 +98,15 @@ export class DashboardComponent implements OnInit {
   }
 
   getStatusColor(status: string): string {
+    // Adaptation pour gérer les valeurs de l'enum
     switch (status) {
-      case 'En Cours':
+      case MarketStatus.EN_COURS:
         return 'primary';
-      case 'Terminé':
+      case MarketStatus.TERMINE:
         return 'accent';
-      case 'En Préparation':
+      case MarketStatus.EN_PREPARATION:
         return 'warn';
-      case 'Annulé':
+      case MarketStatus.ANNULE:
         return 'warn';
       default:
         return 'primary';
@@ -111,6 +114,7 @@ export class DashboardComponent implements OnInit {
   }
 
   getStatusLabel(status: string): string {
+    // Optionnel : Vous pouvez retourner une version lisible ici si nécessaire
     return status;
   }
 

@@ -7,7 +7,7 @@
     <span class="toolbar-spacer"></span>
 
     <div class="user-menu">
-      @if (currentUser$ | async; as user) {
+      <ng-container *ngIf="currentUser$ | async as user">
         <button mat-button [matMenuTriggerFor]="userMenu" class="user-button">
           <mat-icon>account_circle</mat-icon>
           <span class="user-info">
@@ -17,13 +17,13 @@
           <mat-icon>arrow_drop_down</mat-icon>
         </button>
 
-        <mat-menu #userMenu="matMenu">
-          <button mat-menu-item (click)="logout()">
-            <mat-icon>logout</mat-icon>
-            <span>Logout</span>
-          </button>
-        </mat-menu>
-      }
+      <mat-menu #userMenu="matMenu">
+        <button mat-menu-item (click)="onLogout()">
+          <mat-icon>logout</mat-icon>
+          <span>Déconnexion</span>
+        </button>
+      </mat-menu>
+      </ng-container>
     </div>
   </div>
 </mat-toolbar>

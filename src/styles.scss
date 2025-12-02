@@ -1,9 +1,4 @@
-
-// Include theming for Angular Material with `mat.theme()`.
-// This Sass mixin will define CSS variables that are used for styling Angular Material
-// components according to the Material 3 design spec.
-// Learn more about theming and how to use it for your application's
-// custom components at https://material.angular.dev/guide/theming
+// zakar1aa/market-tracking-system/market-tracking-system-5354c2cbdab2dc5b0418bd06b8f05eda69847886/src/styles.scss
 @use '@angular/material' as mat;
 
 html {
@@ -36,4 +31,38 @@ body {
 /* You can add global styles to this file, and also import other style files */
 
 html, body { height: 100%; }
-body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
+body { 
+  margin: 0; 
+  font-family: Roboto, "Helvetica Neue", sans-serif; 
+  background-color: #f8f9fa; /* Fond très clair */
+}
+
+/* Global Modern Styles */
+
+// Appliquer une ombre moderne et des coins arrondis aux cartes et composants principaux
+.mat-card,
+.mat-dialog-container,
+.mat-mdc-card,
+.mat-mdc-dialog-container {
+  border-radius: 12px !important; 
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08), 0 1px 3px rgba(0, 0, 0, 0.05);
+  transition: box-shadow 0.3s ease-in-out;
+}
+
+// Conserver une barre d'outils plus carrée
+.mat-toolbar {
+  border-radius: 0 !important;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+// Arrondir les boutons
+.mat-mdc-raised-button, .mat-mdc-unelevated-button {
+  border-radius: 8px !important;
+}
+
+// Moderniser l'apparence des champs de saisie
+.mat-mdc-form-field {
+  .mat-mdc-text-field-wrapper {
+    border-radius: 8px !important;
+  }
+}

@@ -29,7 +29,6 @@
     } @else {
       <table mat-table [dataSource]="employees" class="employees-table">
         
-        <!-- Nom Column -->
         <ng-container matColumnDef="nom">
           <th mat-header-cell *matHeaderCellDef>Nom</th>
           <td mat-cell *matCellDef="let employee">
@@ -37,13 +36,11 @@
           </td>
         </ng-container>
 
-        <!-- Prénom Column -->
         <ng-container matColumnDef="prenom">
           <th mat-header-cell *matHeaderCellDef>Prénom</th>
           <td mat-cell *matCellDef="let employee">{{ employee.prenom }}</td>
         </ng-container>
 
-        <!-- Email Column -->
         <ng-container matColumnDef="email">
           <th mat-header-cell *matHeaderCellDef>Email</th>
           <td mat-cell *matCellDef="let employee">
@@ -51,23 +48,15 @@
           </td>
         </ng-container>
 
-        <!-- Poste Column -->
-        <ng-container matColumnDef="poste">
-          <th mat-header-cell *matHeaderCellDef>Poste</th>
+        <ng-container matColumnDef="service">
+          <th mat-header-cell *matHeaderCellDef>Service</th>
           <td mat-cell *matCellDef="let employee">
-            {{ employee.poste || 'N/A' }}
+            <mat-chip>
+                {{ employee.service?.nom || 'Non assigné' }}
+            </mat-chip>
           </td>
         </ng-container>
 
-        <!-- Téléphone Column -->
-        <ng-container matColumnDef="telephone">
-          <th mat-header-cell *matHeaderCellDef>Téléphone</th>
-          <td mat-cell *matCellDef="let employee">
-            {{ employee.telephone || 'N/A' }}
-          </td>
-        </ng-container>
-
-        <!-- Actions Column -->
         <ng-container matColumnDef="actions">
           <th mat-header-cell *matHeaderCellDef>Actions</th>
           <td mat-cell *matCellDef="let employee">

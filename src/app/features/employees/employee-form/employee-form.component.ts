@@ -7,7 +7,7 @@ import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
 import { MatSelectModule } from '@angular/material/select';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { Employee } from '../../../core/models/employee.model';
+import { Employee, EmployeeRole } from '../../../core/models/employee.model';
 import { Service } from '../../../core/models/service.model';
 import { EmployeeService } from '../../../core/services/employee.service';
 import { ServiceService } from '../../../core/services/service.service';
@@ -35,6 +35,7 @@ export class EmployeeFormComponent implements OnInit {
   isSaving = false;
   
   services: Service[] = [];
+  roles = Object.values(EmployeeRole); // Pour la liste déroulante
 
   constructor(
     private fb: FormBuilder,
@@ -45,13 +46,13 @@ export class EmployeeFormComponent implements OnInit {
   ) {
     this.isEditMode = !!data?.employee;
     
+    // Adaptation au Backend : Suppression de telephone/poste, Ajout de Role
     this.employeeForm = this.fb.group({
       nom: [data?.employee?.nom || '', [Validators.required, Validators.minLength(2)]],
       prenom: [data?.employee?.prenom || '', [Validators.required, Validators.minLength(2)]],
-      email: [data?.employee?.email || '', [Validators.email]],
-      telephone: [data?.employee?.telephone || ''],
-      poste: [data?.employee?.poste || ''],
-      id_service: [data?.employee?.id_service || null]
+      email: [data?.employee?.email || '', [Validators.required, Validators.email]],
+      role: [data?.employee?.role || 'EMPLOYE', [Validators.required]], // Valeur par défaut
+      id_service: [data?.employee?.id_service || null, [Validators.required]] // Requis par le backend
     });
   }
 
@@ -76,12 +77,24 @@ export class EmployeeFormComponent implements OnInit {
     if (this.employeeForm.valid && !this.isSaving) {
       this.isSaving = true;
       const formValue = this.employeeForm.value;
+
+      // 💡 TRANSFORMATION CRUCIALE POUR LE BACKEND
+      // Le backend attend "idService" et non "id_service"
+      const payload: any = {
+        nom: formValue.nom,
+        prenom: formValue.prenom,
+        email: formValue.email,
+        role: formValue.role,
+        idService: formValue.id_service, // Mapping id_service -> idService
+        actif: true // Valeur par défaut
+      };
       
+      console.log('Envoi au backend:', payload); // Pour debug
+
       if (this.isEditMode && this.data.employee?.id_employe) {
-        // Update existing employee
-        this.employeeService.updateEmployee(this.data.employee.id_employe, formValue).subscribe({
+        this.employeeService.updateEmployee(this.data.employee.id_employe, payload).subscribe({
           next: (response) => {
-            this.dialogRef.close({ ...formValue, id_employe: this.data.employee!.id_employe });
+            this.dialogRef.close(response);
           },
           error: (error) => {
             console.error('Error updating employee:', error);
@@ -89,13 +102,13 @@ export class EmployeeFormComponent implements OnInit {
           }
         });
       } else {
-        // Create new employee
-        this.employeeService.createEmployee(formValue).subscribe({
+        this.employeeService.createEmployee(payload).subscribe({
           next: (response) => {
             this.dialogRef.close(response);
           },
           error: (error) => {
             console.error('Error creating employee:', error);
+            alert("Erreur lors de la création : " + (error.error?.message || error.message));
             this.isSaving = false;
           }
         });

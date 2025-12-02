@@ -11,6 +11,7 @@ import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { Employee } from '../../../core/models/employee.model';
 import { EmployeeService } from '../../../core/services/employee.service';
 import { EmployeeFormComponent } from '../employee-form/employee-form.component';
+import { MatChipsModule } from '@angular/material/chips'; // 👈 IMPORT NÉCESSAIRE
 
 @Component({
   selector: 'app-employee-list',
@@ -24,13 +25,14 @@ import { EmployeeFormComponent } from '../employee-form/employee-form.component'
     MatDialogModule,
     MatTooltipModule,
     MatProgressSpinnerModule,
-    MatSnackBarModule
+    MatSnackBarModule,
+    MatChipsModule
   ],
   templateUrl: './employee-list.component.html',
   styleUrls: ['./employee-list.component.scss']
 })
 export class EmployeeListComponent implements OnInit {
-  displayedColumns: string[] = ['nom', 'prenom', 'email', 'poste', 'telephone', 'actions'];
+  displayedColumns: string[] = ['nom', 'prenom', 'email', 'service', 'actions'];  
   employees: Employee[] = [];
   isLoading = true;
 

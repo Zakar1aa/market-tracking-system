@@ -1,3 +1,4 @@
+// zakar1aa/market-tracking-system/market-tracking-system-5354c2cbdab2dc5b0418bd06b8f05eda69847886/src/app/features/chef-dashboard/chef-dashboard.component.scss
 .chef-dashboard {
   padding: 2rem;
   max-width: 1400px;
@@ -60,6 +61,13 @@
   margin-bottom: 2rem;
 
   .stat-card {
+    transition: transform 0.3s ease, box-shadow 0.3s ease; /* Ajouté */
+    
+    &:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 10px rgba(0, 0, 0, 0.1);
+    }
+    
     mat-card-content {
       display: flex;
       align-items: center;
@@ -73,6 +81,8 @@
         display: flex;
         align-items: center;
         justify-content: center;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15); /* Ombre sur l'icône */
+
 
         mat-icon {
           font-size: 32px;
@@ -124,6 +134,19 @@
   .tasks-table {
     width: 100%;
     margin-top: 1rem;
+    
+    // Modern table styling
+    .mat-header-cell {
+        font-weight: 600;
+        color: #333;
+        background: #f5f7fa;
+        border-bottom: 2px solid #e0e0e0;
+    }
+
+    .mat-cell {
+        padding: 16px 8px;
+        border-bottom: 1px solid #f0f0f0;
+    }
 
     .task-name {
       display: flex;

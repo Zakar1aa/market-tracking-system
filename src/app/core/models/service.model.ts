@@ -3,5 +3,4 @@ export interface Service {
   nom: string;
   description?: string;
   chef_service?: number;
-  created_at?: string;
 }

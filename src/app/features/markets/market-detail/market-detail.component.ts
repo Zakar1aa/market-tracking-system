@@ -7,9 +7,24 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatChipsModule } from '@angular/material/chips';
 import { MatTabsModule } from '@angular/material/tabs';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
+import { MatListModule } from '@angular/material/list';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
-import { Market } from '../../../core/models/market.model';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatTooltipModule } from '@angular/material/tooltip'; // Ajout pour le tooltip du bouton download
+
+// Models
+import { Market, MarketStatus } from '../../../core/models/market.model';
+import { Task } from '../../../core/models/task.model';
+import { Approval } from '../../../core/models/approval.model';
+
+// Services
+import { MarketService } from '../../../core/services/market.service';
+import { TaskService } from '../../../core/services/task.service';
+import { ApprovalService } from '../../../core/services/approval.service';
+
+// Components
 import { ApprovalDialogComponent } from '../../tasks/approval-dialog/approval-dialog.component';
+import { MarketFormComponent } from '../market-form/market-form.component';
 
 @Component({
   selector: 'app-market-detail',
@@ -22,76 +37,85 @@ import { ApprovalDialogComponent } from '../../tasks/approval-dialog/approval-di
     MatChipsModule,
     MatTabsModule,
     MatDialogModule,
-    MatSnackBarModule
+    MatSnackBarModule,
+    MatListModule,
+    MatProgressSpinnerModule,
+    MatTooltipModule
   ],
   templateUrl: './market-detail.component.html',
   styleUrls: ['./market-detail.component.scss']
 })
 export class MarketDetailComponent implements OnInit {
   market: Market | null = null;
-  mockMarkets: Market[] = [
-    {
-      id_marche: 1,
-      intitule: 'Technology',
-      objectif: 'Technology and software development market',
-      statut: 'En Cours',
-      date_debut: '2025-01-15',
-      date_fin: '2025-12-31',
-      id_service: 1,
-      created_at: '2025-01-15T10:00:00'
-    },
-    {
-      id_marche: 2,
-      intitule: 'Healthcare',
-      objectif: 'Healthcare and medical services market',
-      statut: 'En Cours',
-      date_debut: '2025-02-10',
-      date_fin: '2025-12-31',
-      id_service: 1,
-      created_at: '2025-02-10T10:00:00'
-    },
-    {
-      id_marche: 3,
-      intitule: 'Finance',
-      objectif: 'Financial services and banking market',
-      statut: 'En Cours',
-      date_debut: '2025-03-05',
-      date_fin: '2025-12-31',
-      id_service: 1,
-      created_at: '2025-03-05T10:00:00'
-    },
-    {
-      id_marche: 4,
-      intitule: 'E-commerce',
-      objectif: 'Online retail and shopping platforms',
-      statut: 'En Préparation',
-      date_debut: '2025-10-20',
-      date_fin: '2025-12-31',
-      id_service: 1,
-      created_at: '2025-10-20T10:00:00'
-    },
-    {
-      id_marche: 5,
-      intitule: 'Education',
-      objectif: 'Educational technology and learning platforms',
-      statut: 'Terminé',
-      date_debut: '2025-04-12',
-      date_fin: '2025-09-30',
-      id_service: 1,
-      created_at: '2025-04-12T10:00:00'
-    }
-  ];
+  tasks: Task[] = [];
+  approvals: Approval[] = [];
+  
+  isLoading = true;
+  isLoadingTasks = false;
+  isLoadingApprovals = false;
 
   constructor(
     private route: ActivatedRoute,
     private router: Router,
     private dialog: MatDialog,
-    private snackBar: MatSnackBar
+    private snackBar: MatSnackBar,
+    private marketService: MarketService,
+    private taskService: TaskService,
+    private approvalService: ApprovalService
   ) {}
 
   ngOnInit(): void {
     const id = Number(this.route.snapshot.paramMap.get('id'));
-    this.market = this.mockMarkets.find(m => m.id_marche === id) || null;
+    if (id) {
+      this.loadMarketData(id);
+    }
+  }
+
+  loadMarketData(id: number): void {
+    this.isLoading = true;
+    
+    this.marketService.getMarketById(id).subscribe({
+      next: (market) => {
+        this.market = market;
+        this.isLoading = false;
+        // Charger les données liées
+        this.loadTasks(id);
+        this.loadApprovals(id);
+      },
+      error: (error) => {
+        console.error('Erreur chargement marché:', error);
+        this.snackBar.open('Erreur lors du chargement du marché', 'Fermer', { duration: 3000 });
+        this.isLoading = false;
+      }
+    });
+  }
+
+  loadTasks(marketId: number): void {
+    this.isLoadingTasks = true;
+    this.taskService.getAllTasks().subscribe({
+      next: (allTasks) => {
+        this.tasks = allTasks.filter(t => t.id_marche === marketId);
+        this.isLoadingTasks = false;
+      },
+      error: (err) => {
+        console.error('Erreur chargement tâches:', err);
+        this.isLoadingTasks = false;
+      }
+    });
+  }
+
+  loadApprovals(marketId: number): void {
+    this.isLoadingApprovals = true;
+    this.approvalService.getApprovalsByMarket(marketId).subscribe({
+      next: (approvals) => {
+        this.approvals = approvals;
+        this.isLoadingApprovals = false;
+      },
+      error: (err) => {
+        console.error('Erreur chargement approbations:', err);
+        this.isLoadingApprovals = false;
+      }
+    });
   }
 
   goBack(): void {
@@ -99,13 +123,23 @@ export class MarketDetailComponent implements OnInit {
   }
 
   editMarket(): void {
-    if (this.market) {
-      this.router.navigate(['/markets/edit', this.market.id_marche]);
-    }
+    if (!this.market) return;
+
+    const dialogRef = this.dialog.open(MarketFormComponent, {
+      width: '600px',
+      data: { market: this.market }
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      if (result) {
+        this.loadMarketData(this.market!.id_marche!);
+        this.snackBar.open('Marché mis à jour', 'Fermer', { duration: 3000 });
+      }
+    });
   }
 
   openApprovalDialog(): void {
-    if (!this.market) return;
+    if (!this.market || !this.market.id_marche) return;
 
     const dialogRef = this.dialog.open(ApprovalDialogComponent, {
       width: '600px',
@@ -120,31 +154,36 @@ export class MarketDetailComponent implements OnInit {
         const message = result.statut === 'Approuvé' 
           ? 'Marché approuvé avec succès' 
           : 'Marché refusé';
-        this.snackBar.open(message, 'Fermer', {
-          duration: 3000
-        });
-        // Optionally reload market data here
+        this.snackBar.open(message, 'Fermer', { duration: 3000 });
+        
+        // Recharger les données pour voir le nouveau statut
+        this.loadMarketData(this.market!.id_marche!);
       }
     });
   }
 
+  downloadDocument(filePath: string): void {
+    console.log('Téléchargement du fichier:', filePath);
+    if (filePath && filePath !== 'default.pdf') {
+       // Logique de téléchargement réelle ici
+       alert(`Simulation du téléchargement pour : ${filePath}`);
+    } else {
+       this.snackBar.open('Aucun fichier physique associé', 'Fermer', { duration: 3000 });
+    }
+  }
+
+  // 💡 MODIFICATION ICI : Visible uniquement si EN_PREPARATION
   canApprove(): boolean {
-    // Allow approval if market is "En Cours"
-    return this.market?.statut === 'En Cours';
+    return this.market?.statut === MarketStatus.EN_PREPARATION;
   }
 
   getStatusColor(status: string): string {
     switch (status) {
-      case 'En Cours':
-        return 'primary';
-      case 'Terminé':
-        return 'accent';
-      case 'En Préparation':
-        return 'warn';
-      case 'Annulé':
-        return 'warn';
-      default:
-        return 'primary';
+      case MarketStatus.EN_COURS: return 'primary';
+      case MarketStatus.TERMINE: return 'accent';
+      case MarketStatus.EN_PREPARATION: return 'warn';
+      case MarketStatus.ANNULE: return 'warn';
+      default: return 'primary';
     }
   }
 }
